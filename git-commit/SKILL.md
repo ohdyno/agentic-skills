@@ -1,11 +1,11 @@
 ---
 name: git-commit
-description: Draft succinct Conventional Commits for the current repository state. Use when the user asks the agent to commit changes, write a commit message, or summarize work for commit. Analyze staged, unstaged, and untracked changes, and implicitly use the conversation history since the last commit to produce a message that captures the purpose of the full change set rather than only the latest prompt.
+description: Create succinct Conventional Commits for the current repository state and, when the user asks to commit, actually make the git commit. Analyze staged, unstaged, and untracked changes, and implicitly use the conversation history since the last commit to produce a message that captures the purpose of the full change set rather than only the latest prompt.
 ---
 
 # Git Commit
 
-Draft one Conventional Commit for the full current change set by using repository state for what changed and conversation history for why it changed.
+When the user asks to commit changes, inspect the full current change set, write one Conventional Commit message that matches the real intent, and execute the commit.
 
 ## Workflow
 
@@ -17,6 +17,8 @@ Review all changes that would be included if the user committed now:
 - Skim the latest commit only when needed to understand what changed since `HEAD`.
 
 Treat the scope as the full working tree delta since the last commit, not merely the files touched by the latest prompt.
+
+If the user asked to commit changes, use the scope that would actually be committed now.
 
 ### 2. Reconstruct the Goal
 
@@ -67,9 +69,21 @@ If the changes support more than one plausible message:
 
 If the repository contains unrelated edits, do not invent a false unifying story. Instead, state that the working tree appears to mix multiple concerns and give the best message for the dominant theme.
 
+### 6. Execute the Commit When Requested
+
+If the user asked to commit:
+- Stage the intended files when appropriate for the request. If the request is broad, treat it as the full current change set.
+- Run `git commit -m "<message>"` with the message you derived.
+- If the commit fails because there is nothing to commit, hooks reject it, or Git reports another actionable problem, report the real failure briefly.
+- After committing, return the commit hash and subject line.
+
+If the user asked only for a message, options, or rationale, do not commit.
+
 ## Output
 
-Default to returning exactly one commit message line and nothing else.
+If the user asked to commit, default to actually committing and then report the resulting commit briefly.
+
+If the user asked only for a message, default to returning exactly one commit message line and nothing else.
 
 If the user asks for options, provide a small set of alternatives ordered from strongest to weaker.
 
