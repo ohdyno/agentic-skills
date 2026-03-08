@@ -5,7 +5,7 @@ description: Bootstrap a repository for agent use by copying a reusable local as
 
 # Bootstrap Agent Setup
 
-Install this skill's repo-local scaffold into the target repository by invoking `scripts/copy_agent_assets.sh` directly.
+Install this skill's repo-local scaffold into the target repository with `scripts/copy_agent_assets.sh`.
 
 ## Workflow
 
@@ -36,11 +36,10 @@ If the script reports conflicts:
 
 If the user wants a merge:
 - Read the existing file and the matching asset file
-- Preserve the intent of both, not just the wording
-- If the two versions conflict in meaning or instruction, ask the user how that contradiction should be resolved before drafting the merge
-- Show the proposed merged content before writing anything
-- Ask for explicit approval
-- Only write the merged version after the user approves it
+- Preserve the intent of both versions, not just the wording
+- If they conflict in meaning, ask the user how to resolve it before drafting
+- Show the proposed merged content before writing
+- Wait for explicit approval before applying it
 
 If the user does not want a merge:
 - Leave the existing file unchanged unless the user explicitly asks to overwrite it

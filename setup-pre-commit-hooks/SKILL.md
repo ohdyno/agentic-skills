@@ -87,7 +87,7 @@ If using the `pre-commit` framework:
 
 After setup:
 - Show the final files changed
-- Run a safe verification step when possible, such as validating config or invoking the hook in a non-destructive way
+- Run a safe verification step when possible, such as config validation or a non-destructive hook invocation
 - Tell the user how to run the hook manually
 
 ## Guardrails
