@@ -5,9 +5,7 @@ description: Draft succinct Conventional Commits for the current repository stat
 
 # Git Commit
 
-Draft one commit message that reflects the intent behind the full set of current changes.
-
-Use the repository state as the source of truth for what changed. Use the conversation history by default to infer why the changes were made and which goal ties them together, even if the user only asks to commit the changes.
+Draft one Conventional Commit for the full current change set by using repository state for what changed and conversation history for why it changed.
 
 ## Workflow
 
@@ -18,11 +16,11 @@ Review all changes that would be included if the user committed now:
 - Read staged and unstaged diffs.
 - Skim the latest commit only when needed to understand what changed since `HEAD`.
 
-Treat the commit scope as the complete working tree delta since the last commit, not merely the files touched by the most recent assistant action.
+Treat the scope as the full working tree delta since the last commit, not merely the files touched by the latest prompt.
 
 ### 2. Reconstruct the Goal
 
-Read the conversation context that led to the current state. Do this implicitly whenever the user asks to commit changes; do not require the user to mention conversation history.
+Read the conversation context that led to the current state. Do this implicitly whenever the user asks to commit changes.
 
 Identify:
 - The user-visible goal
@@ -40,18 +38,13 @@ Use these defaults:
 - `fix` for correcting broken behavior or wrong results
 - `refactor` for structural improvement without behavior change
 - `docs` for documentation-only changes
-- `test` for adding or improving tests
-- `build` for tooling, dependency, or packaging changes
-- `ci` for automation or pipeline changes
 - `chore` for maintenance work that does not fit better elsewhere
 
 Add a scope only when it clarifies the message and remains short.
 
 ### 4. Write for Intent
 
-Write a short subject line in Conventional Commits form:
-
-`type(scope): summary`
+Write a short subject line in Conventional Commits form: `type(scope): summary`
 
 Optimize the summary for why the change exists:
 - Describe the outcome or purpose
@@ -61,13 +54,9 @@ Optimize the summary for why the change exists:
 
 Good patterns:
 - `feat(skills): add a reusable git-commit skill`
-- `fix(parser): handle empty frontmatter safely`
-- `docs(readme): clarify uv and mise requirements`
 
 Weak patterns:
 - `feat: update multiple files`
-- `fix: make requested changes`
-- `chore: modify skill and yaml`
 
 ### 5. Resolve Ambiguity
 
@@ -90,7 +79,5 @@ If the user asks for rationale, add one short explanation after the primary mess
 
 Trigger this skill for requests like:
 - "Commit the current changes."
-- "Commit everything we changed."
 - "Write a commit message for the current changes."
-- "Create the commit message before you commit this."
 - "Summarize everything we changed since the last commit as one commit message."
