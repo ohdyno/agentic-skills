@@ -5,15 +5,13 @@ description: Bootstrap a repository for agent use by copying a reusable local as
 
 # Project Agent Setup
 
-Install a reusable agent scaffold into the current repository by copying this skill's bundled assets with the provided script.
+Install this skill's repo-local scaffold into the target repository with `scripts/copy_agent_assets.sh`.
 
 ## Workflow
 
 ### 1. Confirm the Target
 
-Treat the current working directory as the default target repository unless the user names another path.
-
-Before copying:
+Treat the current working directory as the default target unless the user names another path.
 - Check whether the target already contains files that would conflict with the asset bundle.
 - Prefer a dry run first when the repo state is unclear.
 
@@ -27,11 +25,8 @@ Default command:
 bash scripts/copy_agent_assets.sh --target "$PWD"
 ```
 
-Useful flags:
 - `--dry-run` to preview what would be copied
 - `--force` to overwrite conflicting files only after the user explicitly chooses replacement instead of merge
-
-The script copies everything under `assets/project-template/` into the target repository while preserving relative paths.
 
 ### 3. Handle Conflicts Explicitly
 
@@ -44,8 +39,8 @@ If the user wants a merge:
 - Read the existing file and the matching asset file
 - Preserve the intent of both, not just the wording
 - If the two versions conflict in meaning or instruction, ask the user how that contradiction should be resolved before drafting the merge
-- Show the proposed merged content to the user before writing anything
-- Ask for explicit approval of the merged content
+- Show the proposed merged content before writing anything
+- Ask for explicit approval
 - Only write the merged version after the user approves it
 
 If the user does not want a merge:
@@ -57,18 +52,6 @@ After copying:
 - Fill in project-specific guidance in `AGENTS.md`
 - Add any extra tool-specific files only when the repository actually needs them
 - Keep the repo-local setup lean and actionable
-
-## Bundled Resources
-
-- `scripts/copy_agent_assets.sh`: deterministic asset copier for the current repo
-- `assets/project-template/`: starter files copied into the target repo
-
-## Example Triggers
-
-Use this skill for requests like:
-- "Set this repo up for agent use."
-- "Copy my standard agent files into this project."
-- "Bootstrap a consistent agent scaffold here."
 
 ## Guardrails
 
