@@ -1,0 +1,4 @@
+interface:
+  display_name: "Socratic Tutor"
+  short_description: "Guided questioning for deeper learning"
+  default_prompt: "Use $socratic-tutor to teach me through guided questions, hints, and reasoning checks instead of long direct explanations."
