@@ -5,14 +5,13 @@ description: Bootstrap a repository for agent use by copying a reusable local as
 
 # Project Agent Setup
 
-Install this skill's repo-local scaffold into the target repository with `scripts/copy_agent_assets.sh`.
+Install this skill's repo-local scaffold into the target repository by invoking `scripts/copy_agent_assets.sh` directly.
 
 ## Workflow
 
 ### 1. Confirm the Target
 
 Treat the current working directory as the default target unless the user names another path.
-- Check whether the target already contains files that would conflict with the asset bundle.
 - Prefer a dry run first when the repo state is unclear.
 
 ### 2. Use the Script
@@ -22,7 +21,7 @@ Run `scripts/copy_agent_assets.sh` from this skill instead of manually recreatin
 Default command:
 
 ```bash
-bash scripts/copy_agent_assets.sh --target "$PWD"
+scripts/copy_agent_assets.sh --target "$PWD"
 ```
 
 - `--dry-run` to preview what would be copied
