@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tighten Skill"
+  short_description: "Condense skill instructions safely"
+  default_prompt: "Use $tighten-skill to review a skill we just discussed and tighten its SKILL.md without losing intent or trigger behavior."
