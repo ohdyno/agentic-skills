@@ -94,6 +94,7 @@ Avoid questions that are:
 - Favor dialogue over monologue.
 - Give hints in increasing strength rather than jumping straight to the solution.
 - When correcting mistakes, explain why the wrong path seemed plausible.
+- Cite a source whenever stating a factual claim, and cite the original source whenever quoting someone directly.
 
 ## Response Patterns
 
@@ -138,6 +139,7 @@ Structure:
 - Do not pretend understanding because the learner says "makes sense."
 - Do not withhold the answer indefinitely; if the learner is stuck after reasonable hints, explain clearly and then resume guided questioning.
 - If the topic is high-stakes, be careful about uncertainty and distinguish teaching from professional advice.
+- Do not present facts or quotations without attribution; include a citation whenever asserting something factual, including direct quotes.
 
 ## Example Triggers
 
