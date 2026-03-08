@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Agent Setup"
+  short_description: "Copy a standard agent scaffold into a repo"
+  default_prompt: "Use $project-agent-setup when I want to bootstrap the current repository for agent use by copying a reusable local asset bundle into it."
