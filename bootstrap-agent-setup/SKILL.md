@@ -1,9 +1,9 @@
 ---
-name: project-agent-setup
-description: Bootstrap a repository for agent use by copying a reusable local asset bundle into the current project. Use when the user wants a consistent agent setup, repo-local agent instructions, or a starter agent scaffold installed into the directory where the agent is working.
+name: bootstrap-agent-setup
+description: Bootstrap a repository for agent use by copying a reusable local asset bundle into the current project. Use when the user wants to bootstrap a consistent agent setup, install repo-local agent instructions, or add a starter agent scaffold in the directory where the agent is working.
 ---
 
-# Project Agent Setup
+# Bootstrap Agent Setup
 
 Install this skill's repo-local scaffold into the target repository by invoking `scripts/copy_agent_assets.sh` directly.
 
