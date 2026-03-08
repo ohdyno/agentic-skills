@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Commit"
+  short_description: "Conventional commits from repo intent"
+  default_prompt: "Use $git-commit when I ask you to commit the current changes and draft one concise conventional commit message from the full change set."
