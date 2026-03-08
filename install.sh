@@ -1,0 +1,192 @@
+#!/bin/sh
+
+set -eu
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ./install.sh list [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH]
+  ./install.sh install [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--force] SKILL...
+  ./install.sh install --all [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--force]
+
+Commands:
+  list       List available skills and their install targets
+  install    Install one or more skills, or use --all
+EOF
+}
+
+die() {
+  printf '%s\n' "$1" >&2
+  exit 2
+}
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+CODEX_HOME=${HOME}/.codex
+CLAUDE_HOME=${HOME}/.claude
+AGENT=all
+FORCE=0
+INSTALL_ALL=0
+
+COMMAND=${1:-}
+[ -n "$COMMAND" ] || {
+  usage >&2
+  exit 2
+}
+shift
+
+SKILLS=""
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --agent)
+      [ "$#" -ge 2 ] || die "Missing value for --agent"
+      AGENT=$2
+      case "$AGENT" in
+        codex|claude|all) ;;
+        *) die "Invalid --agent value: $AGENT" ;;
+      esac
+      shift 2
+      ;;
+    --codex-home)
+      [ "$#" -ge 2 ] || die "Missing value for --codex-home"
+      CODEX_HOME=$2
+      shift 2
+      ;;
+    --claude-home)
+      [ "$#" -ge 2 ] || die "Missing value for --claude-home"
+      CLAUDE_HOME=$2
+      shift 2
+      ;;
+    --force)
+      FORCE=1
+      shift
+      ;;
+    --all)
+      INSTALL_ALL=1
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --*)
+      die "Unknown option: $1"
+      ;;
+    *)
+      if [ -z "$SKILLS" ]; then
+        SKILLS=$1
+      else
+        SKILLS="$SKILLS
+$1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+list_skill_names() {
+  find "$SCRIPT_DIR" -mindepth 2 -maxdepth 2 -name SKILL.md -type f \
+    ! -path "$SCRIPT_DIR/.codex/*" \
+    ! -path "$SCRIPT_DIR/.claude/*" \
+    | sed "s|$SCRIPT_DIR/||" \
+    | sed 's|/SKILL.md$||' \
+    | sort
+}
+
+codex_target() {
+  skill_name=$1
+  printf '%s\n' "$CODEX_HOME/skills/$skill_name/SKILL.md"
+}
+
+claude_target() {
+  skill_name=$1
+  printf '%s\n' "$CLAUDE_HOME/agents/$skill_name.md"
+}
+
+copy_file() {
+  source_file=$1
+  target_file=$2
+
+  if [ -e "$target_file" ] && [ "$FORCE" -ne 1 ]; then
+    die "$target_file already exists (use --force to overwrite)"
+  fi
+
+  mkdir -p "$(dirname "$target_file")"
+  cp "$source_file" "$target_file"
+}
+
+list_command() {
+  found=0
+  for skill_name in $(list_skill_names); do
+    found=1
+    printf '%s\n' "$skill_name"
+    if [ "$AGENT" = "codex" ] || [ "$AGENT" = "all" ]; then
+      printf '  codex  -> %s\n' "$(codex_target "$skill_name")"
+    fi
+    if [ "$AGENT" = "claude" ] || [ "$AGENT" = "all" ]; then
+      printf '  claude -> %s\n' "$(claude_target "$skill_name")"
+    fi
+  done
+
+  [ "$found" -eq 1 ] || die "No skills found."
+}
+
+has_skill() {
+  wanted=$1
+  for skill_name in $(list_skill_names); do
+    if [ "$skill_name" = "$wanted" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+install_one() {
+  skill_name=$1
+  source_file=$SCRIPT_DIR/$skill_name/SKILL.md
+
+  [ -f "$source_file" ] || die "Unknown skill: $skill_name"
+
+  if [ "$AGENT" = "codex" ] || [ "$AGENT" = "all" ]; then
+    target_file=$(codex_target "$skill_name")
+    copy_file "$source_file" "$target_file"
+    printf 'installed codex  %s -> %s\n' "$skill_name" "$target_file"
+  fi
+
+  if [ "$AGENT" = "claude" ] || [ "$AGENT" = "all" ]; then
+    target_file=$(claude_target "$skill_name")
+    copy_file "$source_file" "$target_file"
+    printf 'installed claude %s -> %s\n' "$skill_name" "$target_file"
+  fi
+}
+
+install_command() {
+  if [ "$INSTALL_ALL" -eq 1 ]; then
+    set -- $(list_skill_names)
+    [ "$#" -gt 0 ] || die "No skills found."
+  else
+    [ -n "$SKILLS" ] || die "Pass one or more skill names, or use --all."
+    set -- $SKILLS
+    for skill_name in "$@"; do
+      has_skill "$skill_name" || die "Unknown skill: $skill_name"
+    done
+  fi
+
+  for skill_name in "$@"; do
+    install_one "$skill_name"
+  done
+}
+
+case "$COMMAND" in
+  list)
+    [ -z "$SKILLS" ] || die "Unexpected arguments for list: $SKILLS"
+    list_command
+    ;;
+  install)
+    install_command
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
