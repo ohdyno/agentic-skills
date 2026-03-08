@@ -1,0 +1,4 @@
+interface:
+  display_name: "Primary Source Check"
+  short_description: "Verify claims against official sources"
+  default_prompt: "Use $primary-source-check when I ask about current product behavior, official docs, install paths, APIs, or anything else that should be verified against primary sources before answering."
