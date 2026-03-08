@@ -1,42 +1,38 @@
 # Agentic Skills
 
-My collection of agentic skills.
+This repository contains reusable skills for coding agents.
+
+Each skill lives in its own directory and is authored as a `SKILL.md`. That file is the source of truth and should follow the guidance from the skill.md standard site at `agentskills.io`.
 
 ## Purpose
 
-Store reusable agent skills.
+Treat skills as small, portable building blocks for agent behavior. This repo is where they are developed and from which they are installed into local agent-specific directories such as Codex and Claude.
 
 ## Tooling
 
-Run Python commands with `uv`.
+For development, Python commands are run with `uv`.
 
 ## Prerequisite
 
-`mise` manages `uv`, so `mise` is required.
+`mise` manages `uv` in this repo, so `mise` is part of the development setup.
+
+Installation is intentionally separate from the development toolchain. You do not need `mise`, `uv`, or Python just to install skills.
 
 ## Install
 
-This repo keeps each skill's `SKILL.md` as the source of truth, then installs it into agent-specific locations with a plain shell script.
-
-List available skills:
+The shell installer copies each skill into the locations expected by supported agents. For directory-based targets such as Codex and Claude, it installs the full skill directory so assets such as `agents/`, templates, or references can come along with it.
 
 ```bash
 ./install.sh list
 ```
 
-Install one skill for both Codex and Claude:
-
 ```bash
 ./install.sh install git-commit
 ```
 
-Install every skill:
-
 ```bash
 ./install.sh install --all
 ```
-
-Install for a single agent:
 
 ```bash
 ./install.sh install --agent codex git-commit
@@ -46,13 +42,17 @@ Install for a single agent:
 Default install targets:
 
 - Codex: `~/.codex/skills/<skill>/SKILL.md`
-- Claude: `~/.claude/agents/<skill>.md`
+- Claude: `~/.claude/skills/<skill>/SKILL.md`
 
-Use `--force` to overwrite an existing installed skill.
+For both Codex and Claude, the installed path is a full directory under each tool's `skills/` folder.
 
-Development tooling still uses `mise` and `uv`; installation does not.
+Use `--force` to overwrite an existing installed skill. Use `--codex-home` and `--claude-home` to target custom install locations.
 
-Installer regression test:
+Development tooling still uses `mise` and `uv`. Installation does not.
+
+## Testing
+
+The installer has a regression test covering discovery, directory-based installs for both agents, overwrite protection, and agent-specific installs.
 
 ```bash
 ./tests/install_test.sh
@@ -60,4 +60,6 @@ Installer regression test:
 
 ## Contributing
 
-Commit messages must follow Conventional Commits style.
+- Skills should remain readable and portable.
+- `SKILL.md` should stay the canonical source for a skill.
+- Commit messages should follow Conventional Commits style.

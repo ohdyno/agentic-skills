@@ -45,14 +45,18 @@ list_output=$(run_installer list --codex-home "$CODEX_HOME" --claude-home "$CLAU
 assert_contains "$list_output" "git-commit"
 assert_contains "$list_output" "socratic-tutor"
 assert_contains "$list_output" "tighten-skill"
-assert_contains "$list_output" "$CODEX_HOME/skills/git-commit/SKILL.md"
-assert_contains "$list_output" "$CLAUDE_HOME/agents/git-commit.md"
+assert_contains "$list_output" "$CODEX_HOME/skills/git-commit"
+assert_contains "$list_output" "$CLAUDE_HOME/skills/git-commit"
 
 run_installer install git-commit --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
 assert_file_exists "$CODEX_HOME/skills/git-commit/SKILL.md"
-assert_file_exists "$CLAUDE_HOME/agents/git-commit.md"
+assert_file_exists "$CODEX_HOME/skills/git-commit/agents/openai.yaml"
+assert_file_exists "$CLAUDE_HOME/skills/git-commit/SKILL.md"
+assert_file_exists "$CLAUDE_HOME/skills/git-commit/agents/openai.yaml"
 assert_files_equal "$REPO_ROOT/git-commit/SKILL.md" "$CODEX_HOME/skills/git-commit/SKILL.md"
-assert_files_equal "$REPO_ROOT/git-commit/SKILL.md" "$CLAUDE_HOME/agents/git-commit.md"
+assert_files_equal "$REPO_ROOT/git-commit/SKILL.md" "$CLAUDE_HOME/skills/git-commit/SKILL.md"
+assert_files_equal "$REPO_ROOT/git-commit/agents/openai.yaml" "$CODEX_HOME/skills/git-commit/agents/openai.yaml"
+assert_files_equal "$REPO_ROOT/git-commit/agents/openai.yaml" "$CLAUDE_HOME/skills/git-commit/agents/openai.yaml"
 
 if run_installer install git-commit --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null 2>"$TMP_DIR/reinstall.stderr"; then
   fail "expected reinstall without --force to fail"
@@ -63,12 +67,25 @@ run_installer install git-commit --force --codex-home "$CODEX_HOME" --claude-hom
 
 run_installer install socratic-tutor --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
 assert_file_exists "$CODEX_HOME/skills/socratic-tutor/SKILL.md"
-assert_not_exists "$CLAUDE_HOME/agents/socratic-tutor.md"
+assert_file_exists "$CODEX_HOME/skills/socratic-tutor/agents/openai.yaml"
+assert_not_exists "$CLAUDE_HOME/skills/socratic-tutor"
 
 ALL_CODEX_HOME="$TMP_DIR/all-codex-home"
 run_installer install --all --agent codex --codex-home "$ALL_CODEX_HOME" >/dev/null
 assert_file_exists "$ALL_CODEX_HOME/skills/git-commit/SKILL.md"
 assert_file_exists "$ALL_CODEX_HOME/skills/socratic-tutor/SKILL.md"
 assert_file_exists "$ALL_CODEX_HOME/skills/tighten-skill/SKILL.md"
+assert_file_exists "$ALL_CODEX_HOME/skills/git-commit/agents/openai.yaml"
+assert_file_exists "$ALL_CODEX_HOME/skills/socratic-tutor/agents/openai.yaml"
+assert_file_exists "$ALL_CODEX_HOME/skills/tighten-skill/agents/openai.yaml"
+
+ALL_CLAUDE_HOME="$TMP_DIR/all-claude-home"
+run_installer install --all --agent claude --claude-home "$ALL_CLAUDE_HOME" >/dev/null
+assert_file_exists "$ALL_CLAUDE_HOME/skills/git-commit/SKILL.md"
+assert_file_exists "$ALL_CLAUDE_HOME/skills/socratic-tutor/SKILL.md"
+assert_file_exists "$ALL_CLAUDE_HOME/skills/tighten-skill/SKILL.md"
+assert_file_exists "$ALL_CLAUDE_HOME/skills/git-commit/agents/openai.yaml"
+assert_file_exists "$ALL_CLAUDE_HOME/skills/socratic-tutor/agents/openai.yaml"
+assert_file_exists "$ALL_CLAUDE_HOME/skills/tighten-skill/agents/openai.yaml"
 
 printf 'install.sh tests passed\n'

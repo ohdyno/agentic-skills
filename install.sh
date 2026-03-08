@@ -95,24 +95,25 @@ list_skill_names() {
 
 codex_target() {
   skill_name=$1
-  printf '%s\n' "$CODEX_HOME/skills/$skill_name/SKILL.md"
+  printf '%s\n' "$CODEX_HOME/skills/$skill_name"
 }
 
 claude_target() {
   skill_name=$1
-  printf '%s\n' "$CLAUDE_HOME/agents/$skill_name.md"
+  printf '%s\n' "$CLAUDE_HOME/skills/$skill_name"
 }
 
-copy_file() {
-  source_file=$1
-  target_file=$2
+copy_directory() {
+  source_dir=$1
+  target_dir=$2
 
-  if [ -e "$target_file" ] && [ "$FORCE" -ne 1 ]; then
-    die "$target_file already exists (use --force to overwrite)"
+  if [ -e "$target_dir" ] && [ "$FORCE" -ne 1 ]; then
+    die "$target_dir already exists (use --force to overwrite)"
   fi
 
-  mkdir -p "$(dirname "$target_file")"
-  cp "$source_file" "$target_file"
+  rm -rf "$target_dir"
+  mkdir -p "$(dirname "$target_dir")"
+  cp -R "$source_dir" "$target_dir"
 }
 
 list_command() {
@@ -143,20 +144,21 @@ has_skill() {
 
 install_one() {
   skill_name=$1
-  source_file=$SCRIPT_DIR/$skill_name/SKILL.md
+  source_dir=$SCRIPT_DIR/$skill_name
+  source_file=$source_dir/SKILL.md
 
   [ -f "$source_file" ] || die "Unknown skill: $skill_name"
 
   if [ "$AGENT" = "codex" ] || [ "$AGENT" = "all" ]; then
-    target_file=$(codex_target "$skill_name")
-    copy_file "$source_file" "$target_file"
-    printf 'installed codex  %s -> %s\n' "$skill_name" "$target_file"
+    target_dir=$(codex_target "$skill_name")
+    copy_directory "$source_dir" "$target_dir"
+    printf 'installed codex  %s -> %s\n' "$skill_name" "$target_dir"
   fi
 
   if [ "$AGENT" = "claude" ] || [ "$AGENT" = "all" ]; then
-    target_file=$(claude_target "$skill_name")
-    copy_file "$source_file" "$target_file"
-    printf 'installed claude %s -> %s\n' "$skill_name" "$target_file"
+    target_dir=$(claude_target "$skill_name")
+    copy_directory "$source_dir" "$target_dir"
+    printf 'installed claude %s -> %s\n' "$skill_name" "$target_dir"
   fi
 }
 
