@@ -23,6 +23,10 @@ assert_file_exists() {
   [ -f "$1" ] || fail "expected file to exist: $1"
 }
 
+assert_dir_exists() {
+  [ -d "$1" ] || fail "expected directory to exist: $1"
+}
+
 assert_not_exists() {
   [ ! -e "$1" ] || fail "expected path not to exist: $1"
 }
@@ -70,6 +74,22 @@ assert_file_exists "$CODEX_HOME/skills/socratic-tutor/SKILL.md"
 assert_file_exists "$CODEX_HOME/skills/socratic-tutor/agents/openai.yaml"
 assert_not_exists "$CLAUDE_HOME/skills/socratic-tutor"
 
+uninstall_output=$(run_installer uninstall git-commit --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" 2>&1)
+assert_contains "$uninstall_output" "any local modifications will be lost"
+assert_not_exists "$CODEX_HOME/skills/git-commit"
+assert_not_exists "$CLAUDE_HOME/skills/git-commit"
+
+run_installer install git-commit --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
+run_installer uninstall socratic-tutor --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null 2>"$TMP_DIR/uninstall-codex.stderr"
+assert_contains "$(cat "$TMP_DIR/uninstall-codex.stderr")" "any local modifications will be lost"
+assert_not_exists "$CODEX_HOME/skills/socratic-tutor"
+assert_not_exists "$CLAUDE_HOME/skills/socratic-tutor"
+
+if run_installer uninstall socratic-tutor --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null 2>"$TMP_DIR/uninstall-missing.stderr"; then
+  fail "expected uninstall of missing installed skill to fail"
+fi
+assert_contains "$(cat "$TMP_DIR/uninstall-missing.stderr")" "is not installed"
+
 ALL_CODEX_HOME="$TMP_DIR/all-codex-home"
 run_installer install --all --agent codex --codex-home "$ALL_CODEX_HOME" >/dev/null
 assert_file_exists "$ALL_CODEX_HOME/skills/git-commit/SKILL.md"
@@ -87,5 +107,17 @@ assert_file_exists "$ALL_CLAUDE_HOME/skills/tighten-skill/SKILL.md"
 assert_file_exists "$ALL_CLAUDE_HOME/skills/git-commit/agents/openai.yaml"
 assert_file_exists "$ALL_CLAUDE_HOME/skills/socratic-tutor/agents/openai.yaml"
 assert_file_exists "$ALL_CLAUDE_HOME/skills/tighten-skill/agents/openai.yaml"
+
+run_installer uninstall --all --agent codex --codex-home "$ALL_CODEX_HOME" >/dev/null 2>"$TMP_DIR/uninstall-all.stderr"
+assert_contains "$(cat "$TMP_DIR/uninstall-all.stderr")" "any local modifications will be lost"
+assert_not_exists "$ALL_CODEX_HOME/skills/git-commit"
+assert_not_exists "$ALL_CODEX_HOME/skills/socratic-tutor"
+assert_not_exists "$ALL_CODEX_HOME/skills/tighten-skill"
+
+assert_dir_exists "$CODEX_HOME/skills/git-commit"
+if run_installer uninstall not-a-skill --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null 2>"$TMP_DIR/uninstall-unknown.stderr"; then
+  fail "expected uninstall of unknown skill to fail"
+fi
+assert_contains "$(cat "$TMP_DIR/uninstall-unknown.stderr")" "Unknown skill: not-a-skill"
 
 printf 'install.sh tests passed\n'

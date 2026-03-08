@@ -39,6 +39,14 @@ The shell installer copies each skill into the locations expected by supported a
 ./install.sh install --agent claude git-commit
 ```
 
+```bash
+./install.sh uninstall git-commit
+```
+
+```bash
+./install.sh uninstall --all --agent codex
+```
+
 Default install targets:
 
 - Codex: `~/.codex/skills/<skill>/SKILL.md`
@@ -48,11 +56,13 @@ For both Codex and Claude, the installed path is a full directory under each too
 
 Use `--force` to overwrite an existing installed skill. Use `--codex-home` and `--claude-home` to target custom install locations.
 
+Uninstall only works for skills that are present in this repository. During uninstall, the script warns before removing the installed skill directory because any local modifications to installed copies will be lost.
+
 Development tooling still uses `mise` and `uv`. Installation does not.
 
 ## Testing
 
-The installer has a regression test covering discovery, directory-based installs for both agents, overwrite protection, and agent-specific installs.
+The installer has a regression test covering discovery, directory-based installs for both agents, overwrite protection, uninstall behavior, and agent-specific installs.
 
 ```bash
 ./tests/install_test.sh
