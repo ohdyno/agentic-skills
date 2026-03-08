@@ -48,7 +48,9 @@ If the user does not want a merge:
 ### 4. Adapt the Scaffold
 
 After copying:
-- Fill in project-specific guidance in `AGENTS.md`
+- Fill in `README.md` with the project's purpose
+- Fill in `CONTRIBUTING.md` with the repository's contribution guidelines
+- Keep `AGENTS.md` focused on directing agents to read those files first
 - Add any extra tool-specific files only when the repository actually needs them
 - Keep the repo-local setup lean and actionable
 
