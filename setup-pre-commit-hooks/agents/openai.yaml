@@ -1,0 +1,4 @@
+interface:
+  display_name: "Setup Pre-commit Hooks"
+  short_description: "Set up local checks before commit"
+  default_prompt: "Use $setup-pre-commit-hooks when I want repository-local pre-commit hooks or other commit-time checks for formatting, linting, tests, or similar quality gates before code is committed."
