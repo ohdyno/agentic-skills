@@ -5,7 +5,7 @@ description: Tighten an existing skill's SKILL.md without changing what the skil
 
 # Tighten Skill
 
-Review a skill's `SKILL.md` and compress it without weakening the skill.
+Compress a skill's `SKILL.md` without changing what the skill does.
 
 ## Workflow
 
@@ -40,13 +40,7 @@ If a section is verbose but carries unique behavior, compress it rather than del
 
 ### 4. Edit for Density
 
-Rewrite instructions to be:
-- Shorter
-- More direct
-- Less repetitive
-- Easier to scan
-
-Prefer one strong sentence over several weak ones. Keep examples only when they clarify behavior that would otherwise be ambiguous.
+Rewrite instructions to be shorter, more direct, less repetitive, and easier to scan. Prefer one strong sentence over several weak ones. Keep examples only when they clarify ambiguous behavior.
 
 ### 5. Verify the Result
 
@@ -55,17 +49,10 @@ After editing, confirm that:
 - The workflow still tells the agent what to do
 - No distinctive constraint was removed by accident
 
-If validation tooling exists, run it.
-
-## Output
-
-When asked for analysis, identify the best compression opportunities before editing.
-
-When asked to make the change, edit the `SKILL.md` directly and keep the final result lean.
+If asked for analysis, identify the best compression opportunities before editing. If asked to make the change, edit the `SKILL.md` directly. Run validation tooling when available.
 
 ## Examples
 
 Trigger this skill for requests like:
 - "Tighten this skill without losing intent."
 - "Make the skill instructions more succinct."
-- "Review the skill we just created and trim the SKILL.md."
