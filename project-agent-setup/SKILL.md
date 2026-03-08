@@ -54,8 +54,22 @@ After copying:
 - Add any extra tool-specific files only when the repository actually needs them
 - Keep the repo-local setup lean and actionable
 
+### 5. Offer Pre-commit Hooks
+
+Ask whether the user wants git pre-commit hooks set up.
+
+If the user agrees:
+- Propose hooks that run the project's test suite and auto-formatter by default
+- If it is unclear how to run tests or the formatter, ask whether the user wants those commands or instructions set up based on the project's current tooling
+- Show the planned hook content before writing it
+- Ask for explicit approval of the hook content
+- Ask for explicit approval for any related project changes such as dependencies, config files, or documentation updates
+- Only make the hook setup and related modifications after the user approves them
+
 ## Guardrails
 
 - Never replace conflicting setup files silently.
 - Never merge and write a file in one step; preview first, then wait for approval.
 - When intent differs between the repo and the asset, surface the contradiction explicitly instead of guessing.
+- Never set up pre-commit hooks without explicit user consent.
+- Never add hook-related dependencies, configs, or docs without explicit user approval.
