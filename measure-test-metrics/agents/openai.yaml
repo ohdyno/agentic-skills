@@ -1,0 +1,4 @@
+interface:
+  display_name: "Measure Test Metrics"
+  short_description: "Find and integrate deterministic test-metric tools"
+  default_prompt: "Use $measure-test-metrics when I want to find battle-tested deterministic tools for coverage, test fan-out, and mutation testing, then integrate them into a project with approval."
