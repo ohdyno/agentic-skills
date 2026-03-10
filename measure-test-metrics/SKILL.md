@@ -5,7 +5,7 @@ description: Discover, evaluate, and integrate deterministic tools for software 
 
 # Measure Test Metrics
 
-Discover and integrate deterministic project tooling for coverage, test fan-out, and mutation testing.
+Find and integrate deterministic tooling for coverage, test fan-out, and mutation testing.
 
 Read [references/metrics.md](references/metrics.md) for metric definitions and [references/sources.md](references/sources.md) for the source set behind them.
 
@@ -23,7 +23,7 @@ Treat the current working directory as the default target repository unless the 
 
 ### 2. Inspect the Project First
 
-Identify the language, test framework, build tool, and any existing quality tooling before proposing changes.
+Identify the language, build tool, test framework, and any existing quality tooling before proposing changes.
 
 Check only the files needed, such as:
 - build manifests
@@ -96,8 +96,7 @@ After approval:
 - keep commands reproducible and scriptable
 - prefer repo-local commands over ad hoc shell steps
 - document any language-specific mapping for fan-out
-
-If the metric depends on an approximation, state that explicitly in the implementation and output.
+- state any metric approximation explicitly
 
 ### 7. Verify and Interpret
 
@@ -106,7 +105,7 @@ When possible:
 - report the outputs in a comparable format
 - distinguish measured facts from interpretation
 
-Do not treat coverage alone as test quality. Use mutation score and fan-out to add context.
+Do not treat coverage alone as test quality; use mutation score and fan-out to add context.
 
 ## Guardrails
 
