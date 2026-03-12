@@ -127,6 +127,31 @@ test_install_can_keep_previously_installed_renamed_skill() {
   assert_file_exists "$new_codex_skill_dir/SKILL.md"
 }
 
+test_force_install_removes_previously_installed_renamed_skill_without_prompt() {
+  # Arrange
+  old_codex_skill_dir="$CODEX_HOME/skills/measure-test-metrics"
+  old_claude_skill_dir="$CLAUDE_HOME/skills/measure-test-metrics"
+  new_codex_skill_dir="$CODEX_HOME/skills/setup-test-metrics"
+  new_claude_skill_dir="$CLAUDE_HOME/skills/setup-test-metrics"
+  mkdir -p "$old_codex_skill_dir" "$old_claude_skill_dir"
+  printf 'legacy codex skill\n' >"$old_codex_skill_dir/SKILL.md"
+  printf 'legacy claude skill\n' >"$old_claude_skill_dir/SKILL.md"
+
+  # Act
+  install_output=$(
+    "$INSTALLER" install --force setup-test-metrics --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" 2>&1
+  )
+
+  # Assert
+  assert_contains "$install_output" "force enabled; removing the old installed copy"
+  assert_contains "$install_output" "removed renamed skill measure-test-metrics <- $old_codex_skill_dir"
+  assert_contains "$install_output" "removed renamed skill measure-test-metrics <- $old_claude_skill_dir"
+  assert_not_exists "$old_codex_skill_dir"
+  assert_not_exists "$old_claude_skill_dir"
+  assert_file_exists "$new_codex_skill_dir/SKILL.md"
+  assert_file_exists "$new_claude_skill_dir/SKILL.md"
+}
+
 test_agent_specific_install_only_targets_requested_agent() {
   # Arrange
   codex_skill_dir="$CODEX_HOME/skills/socratic-tutor"
@@ -228,6 +253,7 @@ run_test test_install_copies_skill_for_both_agents
 run_test test_reinstall_requires_force
 run_test test_install_can_remove_previously_installed_renamed_skill
 run_test test_install_can_keep_previously_installed_renamed_skill
+run_test test_force_install_removes_previously_installed_renamed_skill_without_prompt
 run_test test_agent_specific_install_only_targets_requested_agent
 run_test test_uninstall_removes_installed_skill_for_both_agents
 run_test test_agent_specific_uninstall_removes_only_requested_agent

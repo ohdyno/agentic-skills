@@ -54,7 +54,7 @@ Default install targets:
 
 For both Codex and Claude, the installed path is a full directory under each tool's `skills/` folder.
 
-Use `--force` to overwrite an existing installed skill. Use `--codex-home` and `--claude-home` to target custom install locations.
+Use `--force` to overwrite an existing installed skill and automatically remove any previously installed renamed copies for the same skill. Use `--codex-home` and `--claude-home` to target custom install locations.
 
 Uninstall only works for skills that are present in this repository. During uninstall, the script warns before removing the installed skill directory because any local modifications to installed copies will be lost.
 

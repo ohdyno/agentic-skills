@@ -197,6 +197,13 @@ confirm_remove_renamed_skill() {
     return 1
   fi
 
+  if [ "$FORCE" -eq 1 ]; then
+    printf 'found previously installed renamed skill %s for %s at %s\n' \
+      "$old_skill_name" "$new_skill_name" "$target_dir" >&2
+    printf 'force enabled; removing the old installed copy\n' >&2
+    return 0
+  fi
+
   if [ ! -r /dev/stdin ]; then
     printf 'warning: found previously installed renamed skill %s for %s at %s, but no interactive input is available; leaving it in place\n' \
       "$old_skill_name" "$new_skill_name" "$target_dir" >&2
