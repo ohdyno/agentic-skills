@@ -46,40 +46,22 @@ test_list_displays_available_skills() {
 }
 
 test_install_copies_skill_for_both_agents() {
-  # Arrange
-  codex_skill_dir="$CODEX_HOME/skills/git-commit"
-  claude_skill_dir="$CLAUDE_HOME/skills/git-commit"
-
   # Act
   run_installer install git-commit --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
 
   # Assert
-  assert_file_exists "$codex_skill_dir/SKILL.md"
-  assert_file_exists "$codex_skill_dir/agents/openai.yaml"
-  assert_file_exists "$claude_skill_dir/SKILL.md"
-  assert_file_exists "$claude_skill_dir/agents/openai.yaml"
-  assert_files_equal "$REPO_ROOT/git-commit/SKILL.md" "$codex_skill_dir/SKILL.md"
-  assert_files_equal "$REPO_ROOT/git-commit/SKILL.md" "$claude_skill_dir/SKILL.md"
-  assert_files_equal "$REPO_ROOT/git-commit/agents/openai.yaml" "$codex_skill_dir/agents/openai.yaml"
-  assert_files_equal "$REPO_ROOT/git-commit/agents/openai.yaml" "$claude_skill_dir/agents/openai.yaml"
+  assert_directory_files_match "$REPO_ROOT/git-commit" "$CODEX_HOME/skills/git-commit"
+  assert_directory_files_match "$REPO_ROOT/git-commit" "$CLAUDE_HOME/skills/git-commit"
 }
 
 test_install_copies_test_review_skill_metadata() {
-  # Arrange
   for skill_name in test-narrative-clarity test-structural-legibility; do
-    codex_skill_dir="$CODEX_HOME/skills/$skill_name"
-    claude_skill_dir="$CLAUDE_HOME/skills/$skill_name"
-
     # Act
     run_installer install "$skill_name" --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
 
     # Assert
-    assert_file_exists "$codex_skill_dir/SKILL.md"
-    assert_file_exists "$codex_skill_dir/agents/openai.yaml"
-    assert_file_exists "$claude_skill_dir/SKILL.md"
-    assert_file_exists "$claude_skill_dir/agents/openai.yaml"
-    assert_files_equal "$REPO_ROOT/$skill_name/agents/openai.yaml" "$codex_skill_dir/agents/openai.yaml"
-    assert_files_equal "$REPO_ROOT/$skill_name/agents/openai.yaml" "$claude_skill_dir/agents/openai.yaml"
+    assert_directory_files_match "$REPO_ROOT/$skill_name" "$CODEX_HOME/skills/$skill_name"
+    assert_directory_files_match "$REPO_ROOT/$skill_name" "$CLAUDE_HOME/skills/$skill_name"
   done
 }
 
@@ -159,8 +141,8 @@ test_install_can_remove_previously_installed_renamed_skill() {
   assert_contains "$install_output" "removed renamed skill project-agent-setup <- $old_claude_skill_dir"
   assert_not_exists "$old_codex_skill_dir"
   assert_not_exists "$old_claude_skill_dir"
-  assert_file_exists "$new_codex_skill_dir/SKILL.md"
-  assert_file_exists "$new_claude_skill_dir/SKILL.md"
+  assert_directory_files_match "$REPO_ROOT/bootstrap-agent-setup" "$new_codex_skill_dir"
+  assert_directory_files_match "$REPO_ROOT/bootstrap-agent-setup" "$new_claude_skill_dir"
 }
 
 test_install_can_keep_previously_installed_renamed_skill() {
@@ -180,7 +162,7 @@ test_install_can_keep_previously_installed_renamed_skill() {
   assert_contains "$install_output" "found previously installed renamed skill measure-test-metrics for setup-test-metrics"
   assert_contains "$install_output" "keeping $old_codex_skill_dir in place"
   assert_dir_exists "$old_codex_skill_dir"
-  assert_file_exists "$new_codex_skill_dir/SKILL.md"
+  assert_directory_files_match "$REPO_ROOT/setup-test-metrics" "$new_codex_skill_dir"
 }
 
 test_force_install_removes_previously_installed_renamed_skill_without_prompt() {
@@ -204,8 +186,8 @@ test_force_install_removes_previously_installed_renamed_skill_without_prompt() {
   assert_contains "$install_output" "removed renamed skill measure-test-metrics <- $old_claude_skill_dir"
   assert_not_exists "$old_codex_skill_dir"
   assert_not_exists "$old_claude_skill_dir"
-  assert_file_exists "$new_codex_skill_dir/SKILL.md"
-  assert_file_exists "$new_claude_skill_dir/SKILL.md"
+  assert_directory_files_match "$REPO_ROOT/setup-test-metrics" "$new_codex_skill_dir"
+  assert_directory_files_match "$REPO_ROOT/setup-test-metrics" "$new_claude_skill_dir"
 }
 
 test_declined_overwrite_skips_renamed_skill_cleanup() {
@@ -229,17 +211,12 @@ test_declined_overwrite_skips_renamed_skill_cleanup() {
 }
 
 test_agent_specific_install_only_targets_requested_agent() {
-  # Arrange
-  codex_skill_dir="$CODEX_HOME/skills/socratic-tutor"
-  claude_skill_dir="$CLAUDE_HOME/skills/socratic-tutor"
-
   # Act
   run_installer install socratic-tutor --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
 
   # Assert
-  assert_file_exists "$codex_skill_dir/SKILL.md"
-  assert_file_exists "$codex_skill_dir/agents/openai.yaml"
-  assert_not_exists "$claude_skill_dir"
+  assert_directory_files_match "$REPO_ROOT/socratic-tutor" "$CODEX_HOME/skills/socratic-tutor"
+  assert_not_exists "$CLAUDE_HOME/skills/socratic-tutor"
 }
 
 test_uninstall_removes_installed_skill_for_both_agents() {
@@ -299,12 +276,9 @@ test_install_all_and_uninstall_all_for_specific_agent() {
   run_installer uninstall --all --agent codex --codex-home "$all_codex_home" >/dev/null 2>"$stderr_file"
 
   # Assert
-  assert_file_exists "$all_claude_home/skills/git-commit/SKILL.md"
-  assert_file_exists "$all_claude_home/skills/socratic-tutor/SKILL.md"
-  assert_file_exists "$all_claude_home/skills/tighten-skill/SKILL.md"
-  assert_file_exists "$all_claude_home/skills/git-commit/agents/openai.yaml"
-  assert_file_exists "$all_claude_home/skills/socratic-tutor/agents/openai.yaml"
-  assert_file_exists "$all_claude_home/skills/tighten-skill/agents/openai.yaml"
+  assert_directory_files_match "$REPO_ROOT/git-commit" "$all_claude_home/skills/git-commit"
+  assert_directory_files_match "$REPO_ROOT/socratic-tutor" "$all_claude_home/skills/socratic-tutor"
+  assert_directory_files_match "$REPO_ROOT/tighten-skill" "$all_claude_home/skills/tighten-skill"
   assert_contains "$(cat "$stderr_file")" "any local modifications will be lost"
   assert_not_exists "$all_codex_home/skills/git-commit"
   assert_not_exists "$all_codex_home/skills/socratic-tutor"
