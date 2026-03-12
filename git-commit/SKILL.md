@@ -5,7 +5,7 @@ description: Create succinct Conventional Commits for the current repository sta
 
 # Git Commit
 
-When the user asks to commit changes, inspect the full current change set, write one Conventional Commit message that matches the real intent, and execute the commit.
+When the user asks to commit changes, inspect the full current change set, write a Conventional Commit subject that matches the real intent, add a short body when it helps, and execute the commit.
 
 ## Workflow
 
@@ -48,17 +48,29 @@ Add a scope only when it clarifies the message and remains short.
 
 Write a short subject line in Conventional Commits form: `type(scope): summary`
 
+Add a brief body only when one or two short sentences materially improve clarity.
+
 Optimize the summary for why the change exists:
 - Describe the outcome or purpose
 - Omit file lists and low-level edit details
 - Avoid repeating obvious diff mechanics such as "update files" or "change code"
 - Keep it concise and specific
 
+Optimize the body for the extra context that would help a reviewer scanning history:
+- State the user-visible effect or behavioral change
+- Mention the key sequencing or tradeoff only when it clarifies intent
+- Omit file inventories, test lists, and low-level patch narration
+- Keep it to 1-2 short sentences
+
 Good patterns:
 - `feat(skills): add a reusable git-commit skill`
 
 Weak patterns:
 - `feat: update multiple files`
+
+Good subject + body pattern:
+- Subject: `fix(installer): prompt before overwriting skills`
+- Body: `Reorders install flow so overwrite confirmation happens before install. Renamed-skill cleanup now runs only after a successful per-agent install.`
 
 ### 5. Resolve Ambiguity
 
@@ -73,9 +85,10 @@ If the repository contains unrelated edits, do not invent a false unifying story
 
 If the user asked to commit:
 - Stage the intended files when appropriate for the request. If the request is broad, treat it as the full current change set.
-- Run `git commit -m "<message>"` with the message you derived.
+- Commit with the derived subject line.
+- If a body is warranted, pass it as a separate paragraph, for example `git commit -m "<subject>" -m "<body>"`.
 - If the commit fails because there is nothing to commit, hooks reject it, or Git reports another actionable problem, report the real failure briefly.
-- After committing, return the commit hash and subject line.
+- After committing, return the commit hash and subject line, and mention the body briefly if one was included.
 
 If the user asked only for a message, options, or rationale, do not commit.
 
@@ -83,11 +96,11 @@ If the user asked only for a message, options, or rationale, do not commit.
 
 If the user asked to commit, default to actually committing and then report the resulting commit briefly.
 
-If the user asked only for a message, default to returning exactly one commit message line and nothing else.
+If the user asked only for a message, default to returning the subject line only unless the user explicitly asks for a full commit message.
 
 If the user asks for options, provide a small set of alternatives ordered from strongest to weaker.
 
-If the user asks for rationale, add one short explanation after the primary message describing the inferred goal.
+If the user asks for rationale, add one short explanation after the primary message describing the inferred goal. If a body would clearly help, include it after the subject.
 
 ## Examples
 
