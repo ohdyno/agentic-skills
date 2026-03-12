@@ -81,6 +81,52 @@ test_reinstall_requires_force() {
   assert_file_exists "$CLAUDE_HOME/skills/git-commit/SKILL.md"
 }
 
+test_install_can_remove_previously_installed_renamed_skill() {
+  # Arrange
+  old_codex_skill_dir="$CODEX_HOME/skills/project-agent-setup"
+  old_claude_skill_dir="$CLAUDE_HOME/skills/project-agent-setup"
+  new_codex_skill_dir="$CODEX_HOME/skills/bootstrap-agent-setup"
+  new_claude_skill_dir="$CLAUDE_HOME/skills/bootstrap-agent-setup"
+  mkdir -p "$old_codex_skill_dir" "$old_claude_skill_dir"
+  printf 'legacy codex skill\n' >"$old_codex_skill_dir/SKILL.md"
+  printf 'legacy claude skill\n' >"$old_claude_skill_dir/SKILL.md"
+
+  # Act
+  install_output=$(
+    printf 'y\ny\n' |
+      "$INSTALLER" install bootstrap-agent-setup --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" 2>&1
+  )
+
+  # Assert
+  assert_contains "$install_output" "found previously installed renamed skill project-agent-setup for bootstrap-agent-setup"
+  assert_contains "$install_output" "removed renamed skill project-agent-setup <- $old_codex_skill_dir"
+  assert_contains "$install_output" "removed renamed skill project-agent-setup <- $old_claude_skill_dir"
+  assert_not_exists "$old_codex_skill_dir"
+  assert_not_exists "$old_claude_skill_dir"
+  assert_file_exists "$new_codex_skill_dir/SKILL.md"
+  assert_file_exists "$new_claude_skill_dir/SKILL.md"
+}
+
+test_install_can_keep_previously_installed_renamed_skill() {
+  # Arrange
+  old_codex_skill_dir="$CODEX_HOME/skills/measure-test-metrics"
+  new_codex_skill_dir="$CODEX_HOME/skills/setup-test-metrics"
+  mkdir -p "$old_codex_skill_dir"
+  printf 'legacy codex skill\n' >"$old_codex_skill_dir/SKILL.md"
+
+  # Act
+  install_output=$(
+    printf 'n\n' |
+      "$INSTALLER" install setup-test-metrics --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" 2>&1
+  )
+
+  # Assert
+  assert_contains "$install_output" "found previously installed renamed skill measure-test-metrics for setup-test-metrics"
+  assert_contains "$install_output" "keeping $old_codex_skill_dir in place"
+  assert_dir_exists "$old_codex_skill_dir"
+  assert_file_exists "$new_codex_skill_dir/SKILL.md"
+}
+
 test_agent_specific_install_only_targets_requested_agent() {
   # Arrange
   codex_skill_dir="$CODEX_HOME/skills/socratic-tutor"
@@ -180,6 +226,8 @@ test_uninstall_unknown_skill_fails() {
 run_test test_list_displays_available_skills
 run_test test_install_copies_skill_for_both_agents
 run_test test_reinstall_requires_force
+run_test test_install_can_remove_previously_installed_renamed_skill
+run_test test_install_can_keep_previously_installed_renamed_skill
 run_test test_agent_specific_install_only_targets_requested_agent
 run_test test_uninstall_removes_installed_skill_for_both_agents
 run_test test_agent_specific_uninstall_removes_only_requested_agent

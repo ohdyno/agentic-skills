@@ -1,0 +1,3 @@
+# old-skill-name new-skill-name
+project-agent-setup bootstrap-agent-setup
+measure-test-metrics setup-test-metrics

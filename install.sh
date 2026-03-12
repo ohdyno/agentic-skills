@@ -24,6 +24,7 @@ die() {
 }
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+RENAMES_FILE=$SCRIPT_DIR/skill-renames.txt
 CODEX_HOME=${HOME}/.codex
 CLAUDE_HOME=${HOME}/.claude
 AGENT=all
@@ -169,12 +170,101 @@ has_skill() {
   return 1
 }
 
+list_previous_skill_names() {
+  skill_name=$1
+
+  [ -f "$RENAMES_FILE" ] || return 0
+
+  while IFS=' ' read -r old_name new_name; do
+    case "$old_name" in
+      ''|'#'*) continue ;;
+    esac
+
+    [ -n "$new_name" ] || continue
+
+    if [ "$new_name" = "$skill_name" ]; then
+      printf '%s\n' "$old_name"
+    fi
+  done < "$RENAMES_FILE"
+}
+
+confirm_remove_renamed_skill() {
+  old_skill_name=$1
+  new_skill_name=$2
+  target_dir=$3
+
+  if [ ! -e "$target_dir" ]; then
+    return 1
+  fi
+
+  if [ ! -r /dev/stdin ]; then
+    printf 'warning: found previously installed renamed skill %s for %s at %s, but no interactive input is available; leaving it in place\n' \
+      "$old_skill_name" "$new_skill_name" "$target_dir" >&2
+    return 1
+  fi
+
+  printf 'found previously installed renamed skill %s for %s at %s\n' \
+    "$old_skill_name" "$new_skill_name" "$target_dir" >&2
+  printf 'remove the old installed copy? [y/N] ' >&2
+
+  if ! IFS= read -r reply; then
+    printf '\nwarning: no response received; leaving %s in place\n' "$target_dir" >&2
+    return 1
+  fi
+
+  case $reply in
+    y|Y|yes|YES|Yes)
+      return 0
+      ;;
+    *)
+      printf 'keeping %s in place\n' "$target_dir" >&2
+      return 1
+      ;;
+  esac
+}
+
+remove_renamed_skill_if_requested() {
+  old_skill_name=$1
+  new_skill_name=$2
+  target_dir=$3
+  expected_root=$4
+
+  if confirm_remove_renamed_skill "$old_skill_name" "$new_skill_name" "$target_dir"; then
+    remove_directory "$target_dir" "$expected_root"
+    printf 'removed renamed skill %s <- %s\n' "$old_skill_name" "$target_dir"
+  fi
+}
+
+cleanup_renamed_installs() {
+  new_skill_name=$1
+
+  for old_skill_name in $(list_previous_skill_names "$new_skill_name"); do
+    if [ "$AGENT" = "codex" ] || [ "$AGENT" = "all" ]; then
+      remove_renamed_skill_if_requested \
+        "$old_skill_name" \
+        "$new_skill_name" \
+        "$(codex_target "$old_skill_name")" \
+        "$CODEX_HOME/skills"
+    fi
+
+    if [ "$AGENT" = "claude" ] || [ "$AGENT" = "all" ]; then
+      remove_renamed_skill_if_requested \
+        "$old_skill_name" \
+        "$new_skill_name" \
+        "$(claude_target "$old_skill_name")" \
+        "$CLAUDE_HOME/skills"
+    fi
+  done
+}
+
 install_one() {
   skill_name=$1
   source_dir=$SCRIPT_DIR/$skill_name
   source_file=$source_dir/SKILL.md
 
   [ -f "$source_file" ] || die "Unknown skill: $skill_name"
+
+  cleanup_renamed_installs "$skill_name"
 
   if [ "$AGENT" = "codex" ] || [ "$AGENT" = "all" ]; then
     target_dir=$(codex_target "$skill_name")

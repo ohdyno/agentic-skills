@@ -58,6 +58,8 @@ Use `--force` to overwrite an existing installed skill. Use `--codex-home` and `
 
 Uninstall only works for skills that are present in this repository. During uninstall, the script warns before removing the installed skill directory because any local modifications to installed copies will be lost.
 
+When a skill has been renamed, install checks `skill-renames.txt` for old-to-new mappings. If an old installed directory is still present for the skill being installed, the script prompts to remove that old installed copy before proceeding.
+
 Development tooling still uses `mise` and `uv`. Installation does not.
 
 ## Testing
