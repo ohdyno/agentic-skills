@@ -23,6 +23,27 @@ die() {
   exit 2
 }
 
+log_stdout() {
+  action=$1
+  message=$2
+
+  printf '[%s] %s\n' "$action" "$message"
+}
+
+log_stderr() {
+  action=$1
+  message=$2
+
+  printf '[%s] %s\n' "$action" "$message" >&2
+}
+
+prompt_stderr() {
+  action=$1
+  message=$2
+
+  printf '[%s] %s' "$action" "$message" >&2
+}
+
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 RENAMES_FILE=$SCRIPT_DIR/skill-renames.txt
 CODEX_HOME=${HOME}/.codex
@@ -143,8 +164,8 @@ print_install_message() {
   target_dir=$3
 
   case "$agent_name" in
-    codex) printf 'installed codex  %s -> %s\n' "$skill_name" "$target_dir" ;;
-    claude) printf 'installed claude %s -> %s\n' "$skill_name" "$target_dir" ;;
+    codex) log_stdout install "codex $skill_name -> $target_dir" ;;
+    claude) log_stdout install "claude $skill_name -> $target_dir" ;;
     *) die "Unknown agent: $agent_name" ;;
   esac
 }
@@ -169,7 +190,8 @@ remove_directory() {
     die "$target_dir is not installed"
   fi
 
-  printf 'warning: uninstalling %s will remove the installed skill directory; any local modifications will be lost\n' "$target_dir" >&2
+  log_stderr warn \
+    "uninstalling $target_dir will remove the installed skill directory; any local modifications will be lost"
   rm -rf "$target_dir"
 }
 
@@ -208,8 +230,8 @@ confirm_overwrite_installed_skill() {
   fi
 
   if [ "$FORCE" -eq 1 ]; then
-    printf 'found existing installed skill %s at %s\n' "$skill_name" "$target_dir" >&2
-    printf 'force enabled; overwriting the installed copy\n' >&2
+    log_stderr found "existing installed skill $skill_name at $target_dir"
+    log_stderr force "overwriting the installed copy"
     return 0
   fi
 
@@ -217,11 +239,12 @@ confirm_overwrite_installed_skill() {
     die "$target_dir already exists (use --force to overwrite)"
   fi
 
-  printf 'found existing installed skill %s at %s\n' "$skill_name" "$target_dir" >&2
-  printf 'overwrite the installed copy? [y/N] ' >&2
+  log_stderr found "existing installed skill $skill_name at $target_dir"
+  prompt_stderr prompt "overwrite the installed copy? [y/N] "
 
   if ! IFS= read -r reply; then
-    printf '\nwarning: no response received; keeping %s in place\n' "$target_dir" >&2
+    printf '\n' >&2
+    log_stderr warn "no response received; keeping $target_dir in place"
     return 1
   fi
 
@@ -230,7 +253,7 @@ confirm_overwrite_installed_skill() {
       return 0
       ;;
     *)
-      printf 'keeping %s in place\n' "$target_dir" >&2
+      log_stderr keep "keeping $target_dir in place"
       return 1
       ;;
   esac
@@ -264,24 +287,25 @@ confirm_remove_renamed_skill() {
   fi
 
   if [ "$FORCE" -eq 1 ]; then
-    printf 'found previously installed renamed skill %s for %s at %s\n' \
-      "$old_skill_name" "$new_skill_name" "$target_dir" >&2
-    printf 'force enabled; removing the old installed copy\n' >&2
+    log_stderr found \
+      "previously installed renamed skill $old_skill_name for $new_skill_name at $target_dir"
+    log_stderr force "removing the old installed copy"
     return 0
   fi
 
   if [ ! -r /dev/stdin ]; then
-    printf 'warning: found previously installed renamed skill %s for %s at %s, but no interactive input is available; leaving it in place\n' \
-      "$old_skill_name" "$new_skill_name" "$target_dir" >&2
+    log_stderr warn \
+      "found previously installed renamed skill $old_skill_name for $new_skill_name at $target_dir, but no interactive input is available; leaving it in place"
     return 1
   fi
 
-  printf 'found previously installed renamed skill %s for %s at %s\n' \
-    "$old_skill_name" "$new_skill_name" "$target_dir" >&2
-  printf 'remove the old installed copy? [y/N] ' >&2
+  log_stderr found \
+    "previously installed renamed skill $old_skill_name for $new_skill_name at $target_dir"
+  prompt_stderr prompt "remove the old installed copy? [y/N] "
 
   if ! IFS= read -r reply; then
-    printf '\nwarning: no response received; leaving %s in place\n' "$target_dir" >&2
+    printf '\n' >&2
+    log_stderr warn "no response received; leaving $target_dir in place"
     return 1
   fi
 
@@ -290,7 +314,7 @@ confirm_remove_renamed_skill() {
       return 0
       ;;
     *)
-      printf 'keeping %s in place\n' "$target_dir" >&2
+      log_stderr keep "keeping $target_dir in place"
       return 1
       ;;
   esac
@@ -304,7 +328,7 @@ remove_renamed_skill_if_requested() {
 
   if confirm_remove_renamed_skill "$old_skill_name" "$new_skill_name" "$target_dir"; then
     remove_directory "$target_dir" "$expected_root"
-    printf 'removed renamed skill %s <- %s\n' "$old_skill_name" "$target_dir"
+    log_stdout remove "renamed skill $old_skill_name <- $target_dir"
   fi
 }
 
@@ -329,7 +353,7 @@ install_for_agent() {
   target_dir=$(agent_target "$agent_name" "$skill_name")
 
   if ! confirm_overwrite_installed_skill "$skill_name" "$target_dir"; then
-    printf 'skipped %s %s; keeping existing install at %s\n' "$agent_name" "$skill_name" "$target_dir" >&2
+    log_stderr skip "$agent_name $skill_name; keeping existing install at $target_dir"
     return 0
   fi
 
@@ -379,13 +403,13 @@ uninstall_one() {
   if [ "$AGENT" = "codex" ] || [ "$AGENT" = "all" ]; then
     target_dir=$(codex_target "$skill_name")
     remove_directory "$target_dir" "$CODEX_HOME/skills"
-    printf 'uninstalled codex  %s <- %s\n' "$skill_name" "$target_dir"
+    log_stdout uninstall "codex $skill_name <- $target_dir"
   fi
 
   if [ "$AGENT" = "claude" ] || [ "$AGENT" = "all" ]; then
     target_dir=$(claude_target "$skill_name")
     remove_directory "$target_dir" "$CLAUDE_HOME/skills"
-    printf 'uninstalled claude %s <- %s\n' "$skill_name" "$target_dir"
+    log_stdout uninstall "claude $skill_name <- $target_dir"
   fi
 }
 
