@@ -111,13 +111,42 @@ copy_directory() {
   source_dir=$1
   target_dir=$2
 
-  if [ -e "$target_dir" ] && [ "$FORCE" -ne 1 ]; then
-    die "$target_dir already exists (use --force to overwrite)"
-  fi
-
   rm -rf "$target_dir"
   mkdir -p "$(dirname "$target_dir")"
   cp -R "$source_dir" "$target_dir"
+}
+
+agent_target() {
+  agent_name=$1
+  skill_name=$2
+
+  case "$agent_name" in
+    codex) codex_target "$skill_name" ;;
+    claude) claude_target "$skill_name" ;;
+    *) die "Unknown agent: $agent_name" ;;
+  esac
+}
+
+agent_root() {
+  agent_name=$1
+
+  case "$agent_name" in
+    codex) printf '%s\n' "$CODEX_HOME/skills" ;;
+    claude) printf '%s\n' "$CLAUDE_HOME/skills" ;;
+    *) die "Unknown agent: $agent_name" ;;
+  esac
+}
+
+print_install_message() {
+  agent_name=$1
+  skill_name=$2
+  target_dir=$3
+
+  case "$agent_name" in
+    codex) printf 'installed codex  %s -> %s\n' "$skill_name" "$target_dir" ;;
+    claude) printf 'installed claude %s -> %s\n' "$skill_name" "$target_dir" ;;
+    *) die "Unknown agent: $agent_name" ;;
+  esac
 }
 
 validate_target_dir() {
@@ -168,6 +197,43 @@ has_skill() {
     fi
   done
   return 1
+}
+
+confirm_overwrite_installed_skill() {
+  skill_name=$1
+  target_dir=$2
+
+  if [ ! -e "$target_dir" ]; then
+    return 0
+  fi
+
+  if [ "$FORCE" -eq 1 ]; then
+    printf 'found existing installed skill %s at %s\n' "$skill_name" "$target_dir" >&2
+    printf 'force enabled; overwriting the installed copy\n' >&2
+    return 0
+  fi
+
+  if [ ! -r /dev/stdin ]; then
+    die "$target_dir already exists (use --force to overwrite)"
+  fi
+
+  printf 'found existing installed skill %s at %s\n' "$skill_name" "$target_dir" >&2
+  printf 'overwrite the installed copy? [y/N] ' >&2
+
+  if ! IFS= read -r reply; then
+    printf '\nwarning: no response received; keeping %s in place\n' "$target_dir" >&2
+    return 1
+  fi
+
+  case $reply in
+    y|Y|yes|YES|Yes)
+      return 0
+      ;;
+    *)
+      printf 'keeping %s in place\n' "$target_dir" >&2
+      return 1
+      ;;
+  esac
 }
 
 list_previous_skill_names() {
@@ -244,24 +310,32 @@ remove_renamed_skill_if_requested() {
 
 cleanup_renamed_installs() {
   new_skill_name=$1
+  agent_name=$2
 
   for old_skill_name in $(list_previous_skill_names "$new_skill_name"); do
-    if [ "$AGENT" = "codex" ] || [ "$AGENT" = "all" ]; then
-      remove_renamed_skill_if_requested \
-        "$old_skill_name" \
-        "$new_skill_name" \
-        "$(codex_target "$old_skill_name")" \
-        "$CODEX_HOME/skills"
-    fi
-
-    if [ "$AGENT" = "claude" ] || [ "$AGENT" = "all" ]; then
-      remove_renamed_skill_if_requested \
-        "$old_skill_name" \
-        "$new_skill_name" \
-        "$(claude_target "$old_skill_name")" \
-        "$CLAUDE_HOME/skills"
-    fi
+    remove_renamed_skill_if_requested \
+      "$old_skill_name" \
+      "$new_skill_name" \
+      "$(agent_target "$agent_name" "$old_skill_name")" \
+      "$(agent_root "$agent_name")"
   done
+}
+
+install_for_agent() {
+  skill_name=$1
+  source_dir=$2
+  agent_name=$3
+
+  target_dir=$(agent_target "$agent_name" "$skill_name")
+
+  if ! confirm_overwrite_installed_skill "$skill_name" "$target_dir"; then
+    printf 'skipped %s %s; keeping existing install at %s\n' "$agent_name" "$skill_name" "$target_dir" >&2
+    return 0
+  fi
+
+  copy_directory "$source_dir" "$target_dir"
+  print_install_message "$agent_name" "$skill_name" "$target_dir"
+  cleanup_renamed_installs "$skill_name" "$agent_name"
 }
 
 install_one() {
@@ -271,18 +345,12 @@ install_one() {
 
   [ -f "$source_file" ] || die "Unknown skill: $skill_name"
 
-  cleanup_renamed_installs "$skill_name"
-
   if [ "$AGENT" = "codex" ] || [ "$AGENT" = "all" ]; then
-    target_dir=$(codex_target "$skill_name")
-    copy_directory "$source_dir" "$target_dir"
-    printf 'installed codex  %s -> %s\n' "$skill_name" "$target_dir"
+    install_for_agent "$skill_name" "$source_dir" codex
   fi
 
   if [ "$AGENT" = "claude" ] || [ "$AGENT" = "all" ]; then
-    target_dir=$(claude_target "$skill_name")
-    copy_directory "$source_dir" "$target_dir"
-    printf 'installed claude %s -> %s\n' "$skill_name" "$target_dir"
+    install_for_agent "$skill_name" "$source_dir" claude
   fi
 }
 

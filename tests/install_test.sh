@@ -64,21 +64,58 @@ test_install_copies_skill_for_both_agents() {
   assert_files_equal "$REPO_ROOT/git-commit/agents/openai.yaml" "$claude_skill_dir/agents/openai.yaml"
 }
 
-test_reinstall_requires_force() {
+test_install_can_overwrite_existing_skill_after_confirmation() {
   # Arrange
-  stderr_file="$TMP_DIR/reinstall.stderr"
-  run_installer install git-commit --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
+  codex_skill_dir="$CODEX_HOME/skills/git-commit"
+  run_installer install git-commit --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
+  printf 'legacy installed skill\n' >"$codex_skill_dir/SKILL.md"
 
   # Act
-  if run_installer install git-commit --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null 2>"$stderr_file"; then
-    fail "expected reinstall without --force to fail"
-  fi
-  run_installer install git-commit --force --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
+  install_output=$(
+    printf 'y\n' |
+      "$INSTALLER" install git-commit --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" 2>&1
+  )
 
   # Assert
-  assert_contains "$(cat "$stderr_file")" "already exists"
-  assert_file_exists "$CODEX_HOME/skills/git-commit/SKILL.md"
-  assert_file_exists "$CLAUDE_HOME/skills/git-commit/SKILL.md"
+  assert_contains "$install_output" "found existing installed skill git-commit at $codex_skill_dir"
+  assert_file_exists "$codex_skill_dir/SKILL.md"
+  assert_files_equal "$REPO_ROOT/git-commit/SKILL.md" "$codex_skill_dir/SKILL.md"
+}
+
+test_install_can_keep_existing_skill_after_declined_overwrite() {
+  # Arrange
+  codex_skill_dir="$CODEX_HOME/skills/git-commit"
+  run_installer install git-commit --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
+  printf 'legacy installed skill\n' >"$codex_skill_dir/SKILL.md"
+
+  # Act
+  install_output=$(
+    printf 'n\n' |
+      "$INSTALLER" install git-commit --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" 2>&1
+  )
+
+  # Assert
+  assert_contains "$install_output" "found existing installed skill git-commit at $codex_skill_dir"
+  assert_contains "$install_output" "keeping $codex_skill_dir in place"
+  assert_contains "$install_output" "skipped codex git-commit; keeping existing install at $codex_skill_dir"
+  assert_contains "$(cat "$codex_skill_dir/SKILL.md")" "legacy installed skill"
+}
+
+test_force_reinstall_overwrites_existing_skill_without_prompt() {
+  # Arrange
+  codex_skill_dir="$CODEX_HOME/skills/git-commit"
+  run_installer install git-commit --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
+  printf 'legacy installed skill\n' >"$codex_skill_dir/SKILL.md"
+
+  # Act
+  install_output=$(
+    "$INSTALLER" install --force git-commit --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" 2>&1
+  )
+
+  # Assert
+  assert_contains "$install_output" "found existing installed skill git-commit at $codex_skill_dir"
+  assert_contains "$install_output" "force enabled; overwriting the installed copy"
+  assert_files_equal "$REPO_ROOT/git-commit/SKILL.md" "$codex_skill_dir/SKILL.md"
 }
 
 test_install_can_remove_previously_installed_renamed_skill() {
@@ -150,6 +187,26 @@ test_force_install_removes_previously_installed_renamed_skill_without_prompt() {
   assert_not_exists "$old_claude_skill_dir"
   assert_file_exists "$new_codex_skill_dir/SKILL.md"
   assert_file_exists "$new_claude_skill_dir/SKILL.md"
+}
+
+test_declined_overwrite_skips_renamed_skill_cleanup() {
+  # Arrange
+  old_codex_skill_dir="$CODEX_HOME/skills/measure-test-metrics"
+  new_codex_skill_dir="$CODEX_HOME/skills/setup-test-metrics"
+  mkdir -p "$old_codex_skill_dir" "$new_codex_skill_dir"
+  printf 'legacy renamed skill\n' >"$old_codex_skill_dir/SKILL.md"
+  printf 'existing installed skill\n' >"$new_codex_skill_dir/SKILL.md"
+
+  # Act
+  install_output=$(
+    printf 'n\n' |
+      "$INSTALLER" install setup-test-metrics --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" 2>&1
+  )
+
+  # Assert
+  assert_contains "$install_output" "skipped codex setup-test-metrics; keeping existing install at $new_codex_skill_dir"
+  assert_contains "$(cat "$new_codex_skill_dir/SKILL.md")" "existing installed skill"
+  assert_file_exists "$old_codex_skill_dir/SKILL.md"
 }
 
 test_agent_specific_install_only_targets_requested_agent() {
@@ -250,10 +307,13 @@ test_uninstall_unknown_skill_fails() {
 
 run_test test_list_displays_available_skills
 run_test test_install_copies_skill_for_both_agents
-run_test test_reinstall_requires_force
+run_test test_install_can_overwrite_existing_skill_after_confirmation
+run_test test_install_can_keep_existing_skill_after_declined_overwrite
+run_test test_force_reinstall_overwrites_existing_skill_without_prompt
 run_test test_install_can_remove_previously_installed_renamed_skill
 run_test test_install_can_keep_previously_installed_renamed_skill
 run_test test_force_install_removes_previously_installed_renamed_skill_without_prompt
+run_test test_declined_overwrite_skips_renamed_skill_cleanup
 run_test test_agent_specific_install_only_targets_requested_agent
 run_test test_uninstall_removes_installed_skill_for_both_agents
 run_test test_agent_specific_uninstall_removes_only_requested_agent

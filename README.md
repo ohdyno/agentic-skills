@@ -54,11 +54,11 @@ Default install targets:
 
 For both Codex and Claude, the installed path is a full directory under each tool's `skills/` folder.
 
-Use `--force` to overwrite an existing installed skill and automatically remove any previously installed renamed copies for the same skill. Use `--codex-home` and `--claude-home` to target custom install locations.
+If install finds an existing installed copy of the same skill, it prompts before overwriting. After a successful install, if the skill has been renamed, install separately prompts before removing any previously installed renamed copies for that same agent target. Use `--force` to skip both prompts, overwrite the existing installed skill, and automatically remove any previously installed renamed copies for the same skill. Use `--codex-home` and `--claude-home` to target custom install locations.
 
 Uninstall only works for skills that are present in this repository. During uninstall, the script warns before removing the installed skill directory because any local modifications to installed copies will be lost.
 
-When a skill has been renamed, install checks `skill-renames.txt` for old-to-new mappings. If an old installed directory is still present for the skill being installed, the script prompts to remove that old installed copy before proceeding.
+When a skill has been renamed, install checks `skill-renames.txt` for old-to-new mappings after each successful per-agent install. If an old installed directory is still present for that agent target, the script prompts to remove that old installed copy.
 
 Development tooling still uses `mise` and `uv`. Installation does not.
 
