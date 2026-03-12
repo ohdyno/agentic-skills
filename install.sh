@@ -38,8 +38,12 @@ fd_supports_color() {
 }
 
 init_colors() {
+  stdout_action_prefix=
+  stdout_action_suffix=
   stdout_skill_prefix=
   stdout_skill_suffix=
+  stderr_action_prefix=
+  stderr_action_suffix=
   stderr_skill_prefix=
   stderr_skill_suffix=
 
@@ -47,24 +51,42 @@ init_colors() {
     return
   fi
 
+  action_prefix=$(printf '\033[1;34m')
+  action_suffix=$(printf '\033[0m')
   skill_prefix=$(printf '\033[1;36m')
   skill_suffix=$(printf '\033[0m')
 
   if should_force_color || fd_supports_color 1; then
+    stdout_action_prefix=$action_prefix
+    stdout_action_suffix=$action_suffix
     stdout_skill_prefix=$skill_prefix
     stdout_skill_suffix=$skill_suffix
   fi
 
   if should_force_color || fd_supports_color 2; then
+    stderr_action_prefix=$action_prefix
+    stderr_action_suffix=$action_suffix
     stderr_skill_prefix=$skill_prefix
     stderr_skill_suffix=$skill_suffix
   fi
+}
+
+stdout_action_tag() {
+  action=$1
+
+  printf '%s[%s]%s' "$stdout_action_prefix" "$action" "$stdout_action_suffix"
 }
 
 stdout_skill_name() {
   skill_name=$1
 
   printf '%s%s%s' "$stdout_skill_prefix" "$skill_name" "$stdout_skill_suffix"
+}
+
+stderr_action_tag() {
+  action=$1
+
+  printf '%s[%s]%s' "$stderr_action_prefix" "$action" "$stderr_action_suffix"
 }
 
 stderr_skill_name() {
@@ -77,21 +99,21 @@ log_stdout() {
   action=$1
   message=$2
 
-  printf '[%s] %s\n' "$action" "$message"
+  printf '%s %s\n' "$(stdout_action_tag "$action")" "$message"
 }
 
 log_stderr() {
   action=$1
   message=$2
 
-  printf '[%s] %s\n' "$action" "$message" >&2
+  printf '%s %s\n' "$(stderr_action_tag "$action")" "$message" >&2
 }
 
 prompt_stderr() {
   action=$1
   message=$2
 
-  printf '[%s] %s' "$action" "$message" >&2
+  printf '%s %s' "$(stderr_action_tag "$action")" "$message" >&2
 }
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)

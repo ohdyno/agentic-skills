@@ -58,8 +58,9 @@ test_install_copies_skill_for_both_agents() {
   assert_directory_files_match "$REPO_ROOT/git-commit" "$CLAUDE_HOME/skills/git-commit"
 }
 
-test_force_color_highlights_skill_names_in_install_output() {
+test_force_color_highlights_action_tags_and_skill_names_in_install_output() {
   # Arrange
+  colored_action=$(printf '\033[1;34m[install]\033[0m')
   colored_skill=$(printf '\033[1;36mgit-commit\033[0m')
 
   # Act
@@ -68,11 +69,12 @@ test_force_color_highlights_skill_names_in_install_output() {
   )
 
   # Assert
-  assert_contains "$install_output" "[install] codex $colored_skill -> $CODEX_HOME/skills/git-commit"
+  assert_contains "$install_output" "$colored_action codex $colored_skill -> $CODEX_HOME/skills/git-commit"
 }
 
 test_no_color_flag_disables_forced_skill_name_highlighting() {
   # Arrange
+  colored_action=$(printf '\033[1;34m[install]\033[0m')
   colored_skill=$(printf '\033[1;36mgit-commit\033[0m')
 
   # Act
@@ -82,6 +84,7 @@ test_no_color_flag_disables_forced_skill_name_highlighting() {
 
   # Assert
   assert_contains "$install_output" "[install] codex git-commit -> $CODEX_HOME/skills/git-commit"
+  assert_not_contains "$install_output" "$colored_action"
   assert_not_contains "$install_output" "$colored_skill"
 }
 
@@ -343,7 +346,7 @@ test_uninstall_unknown_skill_fails() {
 
 run_test test_list_displays_available_skills
 run_test test_install_copies_skill_for_both_agents
-run_test test_force_color_highlights_skill_names_in_install_output
+run_test test_force_color_highlights_action_tags_and_skill_names_in_install_output
 run_test test_no_color_flag_disables_forced_skill_name_highlighting
 run_test test_install_can_overwrite_existing_skill_after_confirmation
 run_test test_install_can_keep_existing_skill_after_declined_overwrite
