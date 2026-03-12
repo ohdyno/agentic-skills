@@ -75,3 +75,6 @@ The installer has a regression test covering discovery, directory-based installs
 - Skills should remain readable and portable.
 - `SKILL.md` should stay the canonical source for a skill.
 - Commit messages should follow Conventional Commits style.
+- Treat `SKILL.md` instruction changes as behavior changes to the skill, not
+  documentation-only edits. Prefer types such as `feat`, `fix`, or `refactor`
+  over `docs` when the skill's behavior changes.
