@@ -1,23 +1,23 @@
 ---
-name: measure-test-metrics
-description: Discover, evaluate, and integrate deterministic tools for software testing metrics such as coverage, test fan-out, and mutation testing. Use when the user wants battle-tested tooling to measure test effectiveness, compare test quality signals, or augment a project with test-metrics automation.
+name: setup-test-metrics
+description: Set up deterministic tooling to collect software testing metrics such as coverage, test fan-out, and mutation score. Use when the user wants help choosing, installing, configuring, or automating battle-tested test-metric tools in a project.
 ---
 
-# Measure Test Metrics
+# Setup Test Metrics
 
-Find and integrate deterministic tooling for coverage, test fan-out, and mutation testing.
+Set up deterministic tooling to collect coverage, test fan-out, and mutation score.
 
 Read [references/metrics.md](references/metrics.md) for metric definitions and [references/sources.md](references/sources.md) for the source set behind them.
 
 ## Workflow
 
-### 1. Confirm the Goal
+### 1. Confirm the Setup Goal
 
 Clarify whether the user wants to:
-- define the metrics
-- add tooling to collect them
-- run the metrics
-- interpret the results
+- choose tools to collect the metrics
+- add or configure tooling in the repository
+- automate metric collection locally or in CI
+- run the configured tools and review the outputs
 
 Treat the current working directory as the default target repository unless the user names another path.
 
@@ -68,7 +68,7 @@ Measure fan-out at the smallest meaningful dependency unit supported by the lang
 
 Prefer static fan-out first. Use dynamic fan-out only if the user asks for runtime measurement.
 
-### 5. Propose a Minimal Collection Plan
+### 5. Propose a Minimal Collection Setup
 
 Before making changes, show:
 - which tools you plan to use
@@ -98,12 +98,12 @@ After approval:
 - document any language-specific mapping for fan-out
 - state any metric approximation explicitly
 
-### 7. Verify and Interpret
+### 7. Verify the Setup
 
 When possible:
 - run the configured metric commands
 - report the outputs in a comparable format
-- distinguish measured facts from interpretation
+- distinguish measured facts from setup guidance or interpretation
 
 Do not treat coverage alone as test quality; use mutation score and fan-out to add context.
 
