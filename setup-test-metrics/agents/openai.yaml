@@ -1,4 +1,4 @@
 interface:
   display_name: "Setup Test Metrics"
   short_description: "Set up deterministic tools for collecting test metrics"
-  default_prompt: "Use $setup-test-metrics when I want help choosing, configuring, or automating battle-tested tools that collect coverage, test fan-out, and mutation score in a project."
+  default_prompt: "Use $setup-test-metrics to choose, configure, or automate deterministic tooling for coverage, test fan-out, and mutation score."

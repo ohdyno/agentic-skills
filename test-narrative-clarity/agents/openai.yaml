@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Narrative Clarity"
+  short_description: "Review whether tests tell clear domain stories"
+  default_prompt: "Use $test-narrative-clarity to review whether tests tell a clear business story and use consistent domain language."

@@ -64,6 +64,25 @@ test_install_copies_skill_for_both_agents() {
   assert_files_equal "$REPO_ROOT/git-commit/agents/openai.yaml" "$claude_skill_dir/agents/openai.yaml"
 }
 
+test_install_copies_test_review_skill_metadata() {
+  # Arrange
+  for skill_name in test-narrative-clarity test-structural-legibility; do
+    codex_skill_dir="$CODEX_HOME/skills/$skill_name"
+    claude_skill_dir="$CLAUDE_HOME/skills/$skill_name"
+
+    # Act
+    run_installer install "$skill_name" --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
+
+    # Assert
+    assert_file_exists "$codex_skill_dir/SKILL.md"
+    assert_file_exists "$codex_skill_dir/agents/openai.yaml"
+    assert_file_exists "$claude_skill_dir/SKILL.md"
+    assert_file_exists "$claude_skill_dir/agents/openai.yaml"
+    assert_files_equal "$REPO_ROOT/$skill_name/agents/openai.yaml" "$codex_skill_dir/agents/openai.yaml"
+    assert_files_equal "$REPO_ROOT/$skill_name/agents/openai.yaml" "$claude_skill_dir/agents/openai.yaml"
+  done
+}
+
 test_install_can_overwrite_existing_skill_after_confirmation() {
   # Arrange
   codex_skill_dir="$CODEX_HOME/skills/git-commit"
@@ -307,6 +326,7 @@ test_uninstall_unknown_skill_fails() {
 
 run_test test_list_displays_available_skills
 run_test test_install_copies_skill_for_both_agents
+run_test test_install_copies_test_review_skill_metadata
 run_test test_install_can_overwrite_existing_skill_after_confirmation
 run_test test_install_can_keep_existing_skill_after_declined_overwrite
 run_test test_force_reinstall_overwrites_existing_skill_without_prompt

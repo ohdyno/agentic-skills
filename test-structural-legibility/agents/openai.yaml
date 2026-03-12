@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Structural Legibility"
+  short_description: "Review the mechanical readability of tests"
+  default_prompt: "Use $test-structural-legibility to review whether tests are easy to scan, with clear flow and limited hidden indirection."

@@ -1,4 +1,4 @@
 interface:
   display_name: "Git Commit"
   short_description: "Draft and run conventional commits"
-  default_prompt: "Use $git-commit when I ask you to commit the current changes so you inspect the full change set, write one concise conventional commit message, and execute the git commit."
+  default_prompt: "Use $git-commit to inspect the current change set, write an appropriate Conventional Commit, and run git commit."
