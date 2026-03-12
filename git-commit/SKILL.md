@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Create succinct Conventional Commits for the current repository state and, when the user asks to commit, actually make the git commit. Analyze staged, unstaged, and untracked changes, and implicitly use the conversation history since the last commit to produce a message that captures the purpose of the full change set rather than only the latest prompt.
+description: Construct a succinct Conventional Commit message for the current repository state from the conversation history and full working tree, and when the user asks to commit, submit that commit. Analyze staged, unstaged, and untracked changes so the message captures the purpose of the full change set rather than only the latest prompt.
 ---
 
 # Git Commit
