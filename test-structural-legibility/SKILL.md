@@ -1,6 +1,6 @@
 ---
 name: test-structural-legibility
-description: Review the mechanical readability of tests. Use when the user wants to assess setup/action/assertion flow, hidden fixture indirection, branching, assertion focus, or whether a test is easy to scan and follow.
+description: Review the mechanical readability of tests. Use when the user wants to assess setup/action/assertion flow, hidden fixture indirection, branching, assertion focus, whether tests are grouped coherently, or whether a test is easy to scan and follow.
 ---
 
 # Test Structural Legibility
@@ -50,6 +50,7 @@ Look for:
 - low branching and looping
 - low hidden fixture or step-definition indirection
 - readable helper boundaries
+- coherent grouping and ordering of related tests
 
 Flag issues such as:
 - setup buried in distant fixtures
@@ -57,6 +58,7 @@ Flag issues such as:
 - assertion blocks that mix many concerns
 - heavy control flow that obscures the path
 - helpers or step definitions that hide critical state transitions
+- tests with related concerns scattered into hard-to-scan ordering
 
 ### 4. Report Findings as Review Notes
 
@@ -67,11 +69,14 @@ For each issue, state:
 
 When labeling findings, use readability-impact labels such as `important`, `moderate`, or `minor` rather than bug-style severity terms.
 
+Also state whether the tests are organized into coherent groups. If not, include a finding that explains what organizational pattern is missing and suggest a clearer grouping or ordering.
+
 If the user wants a structured review, use:
 - structure summary
 - hidden setup notes
 - action clarity notes
 - assertion or outcome focus notes
+- organization and grouping notes
 
 ## Guardrails
 
