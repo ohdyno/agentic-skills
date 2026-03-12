@@ -65,6 +65,8 @@ For each issue, state:
 - what part of the test is obscured
 - what simplification would improve scanability
 
+When labeling findings, use readability-impact labels such as `important`, `moderate`, or `minor` rather than bug-style severity terms.
+
 If the user wants a structured review, use:
 - structure summary
 - hidden setup notes
