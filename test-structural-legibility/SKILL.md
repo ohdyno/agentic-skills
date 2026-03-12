@@ -5,17 +5,13 @@ description: Review the mechanical readability of tests. Use when the user wants
 
 # Test Structural Legibility
 
-Review tests for structural legibility.
-
-Use this skill when the goal is to judge the mechanical readability of test code, not the quality of its domain language.
+Review tests for structural legibility: mechanical readability, not domain language.
 
 ## Workflow
 
 ### 1. Discover Test Formats
 
-Identify the project's build tool, test runner, and test formats before reviewing anything.
-
-Prefer discovery in this order:
+Identify the build tool, test runner, and test formats first. Prefer:
 1. project management or test tooling commands that can enumerate or dry-run tests without executing them
 2. test runner and build configuration
 3. repository conventions and file heuristics
@@ -31,7 +27,7 @@ If the repository uses multiple test formats, adapt the review to each format in
 
 ### 2. Inspect the Test Shape
 
-Read only the files needed:
+Read only what is needed:
 - the test file
 - helper or fixture files when they hide important setup
 - test framework config only when it affects readability
@@ -46,8 +42,6 @@ Identify the visible structure of each test:
 For Gherkin tests, review both the feature file text and the amount of indirection hidden in step definitions when needed.
 
 ### 3. Evaluate Mechanical Readability
-
-Assess whether the test is easy to scan and follow.
 
 Look for:
 - clear setup/action/assertion or equivalent scenario flow
@@ -65,8 +59,6 @@ Flag issues such as:
 - helpers or step definitions that hide critical state transitions
 
 ### 4. Report Findings as Review Notes
-
-Prefer concrete findings over abstract style commentary.
 
 For each issue, state:
 - where the structure becomes hard to follow

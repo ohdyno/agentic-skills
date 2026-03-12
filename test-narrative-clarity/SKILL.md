@@ -5,17 +5,13 @@ description: Review whether tests communicate clear domain stories with coherent
 
 # Test Narrative Clarity
 
-Review tests for narrative clarity.
-
-Use this skill when the goal is to judge meaning and language, not mechanical code shape.
+Review tests for narrative clarity: meaning and language, not mechanical code shape.
 
 ## Workflow
 
 ### 1. Discover Test Formats
 
-Identify the project's build tool, test runner, and test formats before reviewing anything.
-
-Prefer discovery in this order:
+Identify the build tool, test runner, and test formats first. Prefer:
 1. project management or test tooling commands that can enumerate or dry-run tests without executing them
 2. test runner and build configuration
 3. repository conventions and file heuristics
@@ -31,10 +27,9 @@ If the repository uses multiple test formats, adapt the review to each format in
 
 ### 2. Identify the Story the Test Claims to Tell
 
-Read only the files needed:
+Read only what is needed:
 - the test itself
-- closely related helpers when needed
-- nearby production code when needed to resolve domain terms
+- nearby helpers or production code when needed to resolve domain terms
 - domain docs or glossary files when present
 - step definitions only when feature wording is ambiguous or overloaded
 
@@ -46,8 +41,6 @@ For each test, identify:
 For Gherkin tests, treat the feature file text as the primary narrative source.
 
 ### 3. Evaluate Narrative Clarity
-
-Assess whether the test reads like a clear domain narrative.
 
 Look for:
 - meaningful scenario description
@@ -75,8 +68,6 @@ Distinguish clearly between:
 - your inference about intended domain meaning
 
 ### 5. Report Findings as Review Notes
-
-Prefer concise findings over numeric scoring.
 
 For each issue, state:
 - what is unclear or inconsistent
