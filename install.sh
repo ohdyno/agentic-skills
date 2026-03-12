@@ -5,11 +5,11 @@ set -eu
 usage() {
   cat <<'EOF'
 Usage:
-  ./install.sh list [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH]
-  ./install.sh install [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--force] SKILL...
-  ./install.sh install --all [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--force]
-  ./install.sh uninstall [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] SKILL...
-  ./install.sh uninstall --all [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH]
+  ./install.sh list [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--no-color]
+  ./install.sh install [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--force] [--no-color] SKILL...
+  ./install.sh install --all [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--force] [--no-color]
+  ./install.sh uninstall [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--no-color] SKILL...
+  ./install.sh uninstall --all [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--no-color]
 
 Commands:
   list       List available skills and their install targets
@@ -21,6 +21,56 @@ EOF
 die() {
   printf '%s\n' "$1" >&2
   exit 2
+}
+
+should_force_color() {
+  case ${FORCE_COLOR:-${CLICOLOR_FORCE:-}} in
+    ''|0) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+fd_supports_color() {
+  fd=$1
+
+  [ "${TERM:-}" != "dumb" ] || return 1
+  [ -t "$fd" ]
+}
+
+init_colors() {
+  stdout_skill_prefix=
+  stdout_skill_suffix=
+  stderr_skill_prefix=
+  stderr_skill_suffix=
+
+  if [ "$COLOR_MODE" = "never" ] || [ -n "${NO_COLOR:-}" ]; then
+    return
+  fi
+
+  skill_prefix=$(printf '\033[1;36m')
+  skill_suffix=$(printf '\033[0m')
+
+  if should_force_color || fd_supports_color 1; then
+    stdout_skill_prefix=$skill_prefix
+    stdout_skill_suffix=$skill_suffix
+  fi
+
+  if should_force_color || fd_supports_color 2; then
+    stderr_skill_prefix=$skill_prefix
+    stderr_skill_suffix=$skill_suffix
+  fi
+}
+
+stdout_skill_name() {
+  skill_name=$1
+
+  printf '%s%s%s' "$stdout_skill_prefix" "$skill_name" "$stdout_skill_suffix"
+}
+
+stderr_skill_name() {
+  skill_name=$1
+
+  printf '%s%s%s' "$stderr_skill_prefix" "$skill_name" "$stderr_skill_suffix"
 }
 
 log_stdout() {
@@ -51,6 +101,7 @@ CLAUDE_HOME=${HOME}/.claude
 AGENT=all
 FORCE=0
 INSTALL_ALL=0
+COLOR_MODE=auto
 
 COMMAND=${1:-}
 [ -n "$COMMAND" ] || {
@@ -86,6 +137,10 @@ while [ "$#" -gt 0 ]; do
       FORCE=1
       shift
       ;;
+    --no-color)
+      COLOR_MODE=never
+      shift
+      ;;
     --all)
       INSTALL_ALL=1
       shift
@@ -108,6 +163,8 @@ $1"
       ;;
   esac
 done
+
+init_colors
 
 list_skill_names() {
   find "$SCRIPT_DIR" -mindepth 2 -maxdepth 2 -name SKILL.md -type f \
@@ -164,8 +221,8 @@ print_install_message() {
   target_dir=$3
 
   case "$agent_name" in
-    codex) log_stdout install "codex $skill_name -> $target_dir" ;;
-    claude) log_stdout install "claude $skill_name -> $target_dir" ;;
+    codex) log_stdout install "codex $(stdout_skill_name "$skill_name") -> $target_dir" ;;
+    claude) log_stdout install "claude $(stdout_skill_name "$skill_name") -> $target_dir" ;;
     *) die "Unknown agent: $agent_name" ;;
   esac
 }
@@ -230,7 +287,7 @@ confirm_overwrite_installed_skill() {
   fi
 
   if [ "$FORCE" -eq 1 ]; then
-    log_stderr found "existing installed skill $skill_name at $target_dir"
+    log_stderr found "existing installed skill $(stderr_skill_name "$skill_name") at $target_dir"
     log_stderr force "overwriting the installed copy"
     return 0
   fi
@@ -239,7 +296,7 @@ confirm_overwrite_installed_skill() {
     die "$target_dir already exists (use --force to overwrite)"
   fi
 
-  log_stderr found "existing installed skill $skill_name at $target_dir"
+  log_stderr found "existing installed skill $(stderr_skill_name "$skill_name") at $target_dir"
   prompt_stderr prompt "overwrite the installed copy? [y/N] "
 
   if ! IFS= read -r reply; then
@@ -288,19 +345,19 @@ confirm_remove_renamed_skill() {
 
   if [ "$FORCE" -eq 1 ]; then
     log_stderr found \
-      "previously installed renamed skill $old_skill_name for $new_skill_name at $target_dir"
+      "previously installed renamed skill $(stderr_skill_name "$old_skill_name") for $(stderr_skill_name "$new_skill_name") at $target_dir"
     log_stderr force "removing the old installed copy"
     return 0
   fi
 
   if [ ! -r /dev/stdin ]; then
     log_stderr warn \
-      "found previously installed renamed skill $old_skill_name for $new_skill_name at $target_dir, but no interactive input is available; leaving it in place"
+      "found previously installed renamed skill $(stderr_skill_name "$old_skill_name") for $(stderr_skill_name "$new_skill_name") at $target_dir, but no interactive input is available; leaving it in place"
     return 1
   fi
 
   log_stderr found \
-    "previously installed renamed skill $old_skill_name for $new_skill_name at $target_dir"
+    "previously installed renamed skill $(stderr_skill_name "$old_skill_name") for $(stderr_skill_name "$new_skill_name") at $target_dir"
   prompt_stderr prompt "remove the old installed copy? [y/N] "
 
   if ! IFS= read -r reply; then
@@ -328,7 +385,7 @@ remove_renamed_skill_if_requested() {
 
   if confirm_remove_renamed_skill "$old_skill_name" "$new_skill_name" "$target_dir"; then
     remove_directory "$target_dir" "$expected_root"
-    log_stdout remove "renamed skill $old_skill_name <- $target_dir"
+    log_stdout remove "renamed skill $(stdout_skill_name "$old_skill_name") <- $target_dir"
   fi
 }
 
@@ -353,7 +410,7 @@ install_for_agent() {
   target_dir=$(agent_target "$agent_name" "$skill_name")
 
   if ! confirm_overwrite_installed_skill "$skill_name" "$target_dir"; then
-    log_stderr skip "$agent_name $skill_name; keeping existing install at $target_dir"
+    log_stderr skip "$agent_name $(stderr_skill_name "$skill_name"); keeping existing install at $target_dir"
     return 0
   fi
 
@@ -403,13 +460,13 @@ uninstall_one() {
   if [ "$AGENT" = "codex" ] || [ "$AGENT" = "all" ]; then
     target_dir=$(codex_target "$skill_name")
     remove_directory "$target_dir" "$CODEX_HOME/skills"
-    log_stdout uninstall "codex $skill_name <- $target_dir"
+    log_stdout uninstall "codex $(stdout_skill_name "$skill_name") <- $target_dir"
   fi
 
   if [ "$AGENT" = "claude" ] || [ "$AGENT" = "all" ]; then
     target_dir=$(claude_target "$skill_name")
     remove_directory "$target_dir" "$CLAUDE_HOME/skills"
-    log_stdout uninstall "claude $skill_name <- $target_dir"
+    log_stdout uninstall "claude $(stdout_skill_name "$skill_name") <- $target_dir"
   fi
 }
 

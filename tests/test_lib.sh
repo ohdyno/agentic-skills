@@ -23,6 +23,14 @@ assert_contains() {
   printf '%s' "$haystack" | grep -F "$needle" >/dev/null || fail "expected output to contain: $needle"
 }
 
+assert_not_contains() {
+  haystack=$1
+  needle=$2
+  if printf '%s' "$haystack" | grep -F "$needle" >/dev/null; then
+    fail "expected output not to contain: $needle"
+  fi
+}
+
 assert_files_equal() {
   cmp -s "$1" "$2" || fail "expected files to match: $1 $2"
 }

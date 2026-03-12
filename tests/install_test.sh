@@ -58,6 +58,33 @@ test_install_copies_skill_for_both_agents() {
   assert_directory_files_match "$REPO_ROOT/git-commit" "$CLAUDE_HOME/skills/git-commit"
 }
 
+test_force_color_highlights_skill_names_in_install_output() {
+  # Arrange
+  colored_skill=$(printf '\033[1;36mgit-commit\033[0m')
+
+  # Act
+  install_output=$(
+    env -u NO_COLOR FORCE_COLOR=1 "$INSTALLER" install git-commit --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME"
+  )
+
+  # Assert
+  assert_contains "$install_output" "[install] codex $colored_skill -> $CODEX_HOME/skills/git-commit"
+}
+
+test_no_color_flag_disables_forced_skill_name_highlighting() {
+  # Arrange
+  colored_skill=$(printf '\033[1;36mgit-commit\033[0m')
+
+  # Act
+  install_output=$(
+    env -u NO_COLOR FORCE_COLOR=1 "$INSTALLER" install --no-color git-commit --agent codex --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME"
+  )
+
+  # Assert
+  assert_contains "$install_output" "[install] codex git-commit -> $CODEX_HOME/skills/git-commit"
+  assert_not_contains "$install_output" "$colored_skill"
+}
+
 test_install_can_overwrite_existing_skill_after_confirmation() {
   # Arrange
   codex_skill_dir="$CODEX_HOME/skills/git-commit"
@@ -316,6 +343,8 @@ test_uninstall_unknown_skill_fails() {
 
 run_test test_list_displays_available_skills
 run_test test_install_copies_skill_for_both_agents
+run_test test_force_color_highlights_skill_names_in_install_output
+run_test test_no_color_flag_disables_forced_skill_name_highlighting
 run_test test_install_can_overwrite_existing_skill_after_confirmation
 run_test test_install_can_keep_existing_skill_after_declined_overwrite
 run_test test_force_reinstall_overwrites_existing_skill_without_prompt
