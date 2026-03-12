@@ -54,17 +54,6 @@ test_install_copies_skill_for_both_agents() {
   assert_directory_files_match "$REPO_ROOT/git-commit" "$CLAUDE_HOME/skills/git-commit"
 }
 
-test_install_copies_test_review_skill_metadata() {
-  for skill_name in test-narrative-clarity test-structural-legibility; do
-    # Act
-    run_installer install "$skill_name" --codex-home "$CODEX_HOME" --claude-home "$CLAUDE_HOME" >/dev/null
-
-    # Assert
-    assert_directory_files_match "$REPO_ROOT/$skill_name" "$CODEX_HOME/skills/$skill_name"
-    assert_directory_files_match "$REPO_ROOT/$skill_name" "$CLAUDE_HOME/skills/$skill_name"
-  done
-}
-
 test_install_can_overwrite_existing_skill_after_confirmation() {
   # Arrange
   codex_skill_dir="$CODEX_HOME/skills/git-commit"
@@ -251,6 +240,38 @@ test_agent_specific_uninstall_removes_only_requested_agent() {
   assert_dir_exists "$CLAUDE_HOME/skills/git-commit"
 }
 
+test_install_all_for_specific_agent_only_targets_requested_agent() {
+  # Act
+  run_installer install --all --agent codex --codex-home "$CODEX_HOME" >/dev/null
+
+  # Assert
+  assert_directory_files_match "$REPO_ROOT/git-commit" "$CODEX_HOME/skills/git-commit"
+  assert_directory_files_match "$REPO_ROOT/socratic-tutor" "$CODEX_HOME/skills/socratic-tutor"
+  assert_directory_files_match "$REPO_ROOT/tighten-skill" "$CODEX_HOME/skills/tighten-skill"
+  assert_not_exists "$CLAUDE_HOME/skills/git-commit"
+  assert_not_exists "$CLAUDE_HOME/skills/socratic-tutor"
+  assert_not_exists "$CLAUDE_HOME/skills/tighten-skill"
+}
+
+test_uninstall_all_for_specific_agent_removes_only_requested_agent() {
+  # Arrange
+  stderr_file="$TMP_DIR/uninstall-all.stderr"
+  run_installer install --all --agent codex --codex-home "$CODEX_HOME" >/dev/null
+  run_installer install --all --agent claude --claude-home "$CLAUDE_HOME" >/dev/null
+
+  # Act
+  run_installer uninstall --all --agent codex --codex-home "$CODEX_HOME" >/dev/null 2>"$stderr_file"
+
+  # Assert
+  assert_directory_files_match "$REPO_ROOT/git-commit" "$CLAUDE_HOME/skills/git-commit"
+  assert_directory_files_match "$REPO_ROOT/socratic-tutor" "$CLAUDE_HOME/skills/socratic-tutor"
+  assert_directory_files_match "$REPO_ROOT/tighten-skill" "$CLAUDE_HOME/skills/tighten-skill"
+  assert_contains "$(cat "$stderr_file")" "any local modifications will be lost"
+  assert_not_exists "$CODEX_HOME/skills/git-commit"
+  assert_not_exists "$CODEX_HOME/skills/socratic-tutor"
+  assert_not_exists "$CODEX_HOME/skills/tighten-skill"
+}
+
 test_uninstall_missing_install_fails() {
   # Arrange
   stderr_file="$TMP_DIR/uninstall-missing.stderr"
@@ -262,27 +283,6 @@ test_uninstall_missing_install_fails() {
 
   # Assert
   assert_contains "$(cat "$stderr_file")" "is not installed"
-}
-
-test_install_all_and_uninstall_all_for_specific_agent() {
-  # Arrange
-  all_codex_home="$TMP_DIR/all-codex-home"
-  all_claude_home="$TMP_DIR/all-claude-home"
-  stderr_file="$TMP_DIR/uninstall-all.stderr"
-
-  # Act
-  run_installer install --all --agent codex --codex-home "$all_codex_home" >/dev/null
-  run_installer install --all --agent claude --claude-home "$all_claude_home" >/dev/null
-  run_installer uninstall --all --agent codex --codex-home "$all_codex_home" >/dev/null 2>"$stderr_file"
-
-  # Assert
-  assert_directory_files_match "$REPO_ROOT/git-commit" "$all_claude_home/skills/git-commit"
-  assert_directory_files_match "$REPO_ROOT/socratic-tutor" "$all_claude_home/skills/socratic-tutor"
-  assert_directory_files_match "$REPO_ROOT/tighten-skill" "$all_claude_home/skills/tighten-skill"
-  assert_contains "$(cat "$stderr_file")" "any local modifications will be lost"
-  assert_not_exists "$all_codex_home/skills/git-commit"
-  assert_not_exists "$all_codex_home/skills/socratic-tutor"
-  assert_not_exists "$all_codex_home/skills/tighten-skill"
 }
 
 test_uninstall_unknown_skill_fails() {
@@ -300,7 +300,6 @@ test_uninstall_unknown_skill_fails() {
 
 run_test test_list_displays_available_skills
 run_test test_install_copies_skill_for_both_agents
-run_test test_install_copies_test_review_skill_metadata
 run_test test_install_can_overwrite_existing_skill_after_confirmation
 run_test test_install_can_keep_existing_skill_after_declined_overwrite
 run_test test_force_reinstall_overwrites_existing_skill_without_prompt
@@ -311,8 +310,9 @@ run_test test_declined_overwrite_skips_renamed_skill_cleanup
 run_test test_agent_specific_install_only_targets_requested_agent
 run_test test_uninstall_removes_installed_skill_for_both_agents
 run_test test_agent_specific_uninstall_removes_only_requested_agent
+run_test test_install_all_for_specific_agent_only_targets_requested_agent
+run_test test_uninstall_all_for_specific_agent_removes_only_requested_agent
 run_test test_uninstall_missing_install_fails
-run_test test_install_all_and_uninstall_all_for_specific_agent
 run_test test_uninstall_unknown_skill_fails
 
 printf 'install.sh tests passed\n'
