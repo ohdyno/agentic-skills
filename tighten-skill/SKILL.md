@@ -21,7 +21,7 @@ Treat the existing file as the source of truth for intent.
 ### 2. Find Safe Compression Targets
 
 Look for:
-- Repeated ideas across the description, overview, workflow, and examples
+- Repeated ideas or instructions across the description, overview, workflow, and examples
 - Long examples that restate the rule instead of sharpening it
 - Sections that can be merged without losing decision-making value
 - Lists that can be shortened to the most important cases

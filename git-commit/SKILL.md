@@ -33,11 +33,16 @@ Prefer the single intention that best explains why the changes belong in one com
 Pick the type that matches the intent, not the implementation detail.
 
 Use these defaults:
+- `build` for build system or dependency changes
+- `chore` for maintenance work that does not fit better elsewhere
+- `ci` for CI configuration or automation changes
+- `docs` for documentation-only changes
 - `feat` for new user-facing capability or newly supported workflow
 - `fix` for correcting broken behavior or wrong results
+- `perf` for performance improvements
 - `refactor` for structural improvement without behavior change
-- `docs` for documentation-only changes
-- `chore` for maintenance work that does not fit better elsewhere
+- `style` for formatting or stylistic changes without behavior impact
+- `test` for adding or updating tests
 
 Add a scope only when it clarifies the message and remains short.
 
