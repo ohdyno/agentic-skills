@@ -1,12 +1,12 @@
 # Agentic Skills
 
-This repository contains reusable skills for coding agents.
+This repository contains reusable skills for coding agents, including OpenCode.
 
 Each skill lives in its own directory and is authored as a `SKILL.md`. That file is the source of truth and should follow the guidance from the skill.md standard site at `agentskills.io`.
 
 ## Purpose
 
-Treat skills as small, portable building blocks for agent behavior. This repo is where they are developed and from which they are installed into local agent-specific directories such as Codex and Claude.
+Treat skills as small, portable building blocks for agent behavior. This repo is where they are developed and from which they are installed into local agent-specific directories such as Codex, Claude, and OpenCode.
 
 ## Tooling
 
@@ -37,6 +37,7 @@ The shell installer copies each skill into the locations expected by supported a
 ```bash
 ./install.sh install --agent codex git-commit
 ./install.sh install --agent claude git-commit
+./install.sh install --agent opencode git-commit
 ```
 
 ```bash
@@ -51,10 +52,11 @@ Default install targets:
 
 - Codex: `~/.codex/skills/<skill>/SKILL.md`
 - Claude: `~/.claude/skills/<skill>/SKILL.md`
+- OpenCode: `~/.config/opencode/skills/<skill>/SKILL.md`
 
-For both Codex and Claude, the installed path is a full directory under each tool's `skills/` folder.
+For Codex, Claude, and OpenCode, the installed path is a full directory under each tool's `skills/` folder.
 
-If install finds an existing installed copy of the same skill, it prompts before overwriting. After a successful install, if the skill has been renamed, install separately prompts before removing any previously installed renamed copies for that same agent target. Use `--force` to skip both prompts, overwrite the existing installed skill, and automatically remove any previously installed renamed copies for the same skill. Use `--codex-home` and `--claude-home` to target custom install locations.
+If install finds an existing installed copy of the same skill, it prompts before overwriting. After a successful install, if the skill has been renamed, install separately prompts before removing any previously installed renamed copies for that same agent target. Use `--force` to skip both prompts, overwrite the existing installed skill, and automatically remove any previously installed renamed copies for the same skill. Use `--codex-home`, `--claude-home`, and `--opencode-home` to target custom install locations.
 
 When install output is connected to a color-capable terminal, it highlights action tags and skill names in status messages. Use `--no-color` to disable that formatting.
 
@@ -66,7 +68,7 @@ Development tooling still uses `mise` and `uv`. Installation does not.
 
 ## Testing
 
-The installer has a regression test covering discovery, directory-based installs for both agents, overwrite protection, uninstall behavior, and agent-specific installs.
+The installer has a regression test covering discovery, directory-based installs for all supported agents, overwrite protection, uninstall behavior, and agent-specific installs.
 
 ```bash
 ./tests/install_test.sh

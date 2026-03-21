@@ -5,11 +5,11 @@ set -eu
 usage() {
   cat <<'EOF'
 Usage:
-  ./install.sh list [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--no-color]
-  ./install.sh install [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--force] [--no-color] SKILL...
-  ./install.sh install --all [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--force] [--no-color]
-  ./install.sh uninstall [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--no-color] SKILL...
-  ./install.sh uninstall --all [--agent codex|claude|all] [--codex-home PATH] [--claude-home PATH] [--no-color]
+  ./install.sh list [--agent codex|claude|opencode|all] [--codex-home PATH] [--claude-home PATH] [--opencode-home PATH] [--no-color]
+  ./install.sh install [--agent codex|claude|opencode|all] [--codex-home PATH] [--claude-home PATH] [--opencode-home PATH] [--force] [--no-color] SKILL...
+  ./install.sh install --all [--agent codex|claude|opencode|all] [--codex-home PATH] [--claude-home PATH] [--opencode-home PATH] [--force] [--no-color]
+  ./install.sh uninstall [--agent codex|claude|opencode|all] [--codex-home PATH] [--claude-home PATH] [--opencode-home PATH] [--no-color] SKILL...
+  ./install.sh uninstall --all [--agent codex|claude|opencode|all] [--codex-home PATH] [--claude-home PATH] [--opencode-home PATH] [--no-color]
 
 Commands:
   list       List available skills and their install targets
@@ -120,6 +120,7 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 RENAMES_FILE=$SCRIPT_DIR/skill-renames.txt
 CODEX_HOME=${HOME}/.codex
 CLAUDE_HOME=${HOME}/.claude
+OPENCODE_HOME=${XDG_CONFIG_HOME:-${HOME}/.config}/opencode
 AGENT=all
 FORCE=0
 INSTALL_ALL=0
@@ -140,7 +141,7 @@ while [ "$#" -gt 0 ]; do
       [ "$#" -ge 2 ] || die "Missing value for --agent"
       AGENT=$2
       case "$AGENT" in
-        codex|claude|all) ;;
+        codex|claude|opencode|all) ;;
         *) die "Invalid --agent value: $AGENT" ;;
       esac
       shift 2
@@ -153,6 +154,11 @@ while [ "$#" -gt 0 ]; do
     --claude-home)
       [ "$#" -ge 2 ] || die "Missing value for --claude-home"
       CLAUDE_HOME=$2
+      shift 2
+      ;;
+    --opencode-home)
+      [ "$#" -ge 2 ] || die "Missing value for --opencode-home"
+      OPENCODE_HOME=$2
       shift 2
       ;;
     --force)
@@ -207,6 +213,11 @@ claude_target() {
   printf '%s\n' "$CLAUDE_HOME/skills/$skill_name"
 }
 
+opencode_target() {
+  skill_name=$1
+  printf '%s\n' "$OPENCODE_HOME/skills/$skill_name"
+}
+
 copy_directory() {
   source_dir=$1
   target_dir=$2
@@ -223,6 +234,7 @@ agent_target() {
   case "$agent_name" in
     codex) codex_target "$skill_name" ;;
     claude) claude_target "$skill_name" ;;
+    opencode) opencode_target "$skill_name" ;;
     *) die "Unknown agent: $agent_name" ;;
   esac
 }
@@ -233,6 +245,7 @@ agent_root() {
   case "$agent_name" in
     codex) printf '%s\n' "$CODEX_HOME/skills" ;;
     claude) printf '%s\n' "$CLAUDE_HOME/skills" ;;
+    opencode) printf '%s\n' "$OPENCODE_HOME/skills" ;;
     *) die "Unknown agent: $agent_name" ;;
   esac
 }
@@ -245,6 +258,7 @@ print_install_message() {
   case "$agent_name" in
     codex) log_stdout install "codex $(stdout_skill_name "$skill_name") -> $target_dir" ;;
     claude) log_stdout install "claude $(stdout_skill_name "$skill_name") -> $target_dir" ;;
+    opencode) log_stdout install "opencode $(stdout_skill_name "$skill_name") -> $target_dir" ;;
     *) die "Unknown agent: $agent_name" ;;
   esac
 }
@@ -284,6 +298,9 @@ list_command() {
     fi
     if [ "$AGENT" = "claude" ] || [ "$AGENT" = "all" ]; then
       printf '  claude -> %s\n' "$(claude_target "$skill_name")"
+    fi
+    if [ "$AGENT" = "opencode" ] || [ "$AGENT" = "all" ]; then
+      printf '  opencode -> %s\n' "$(opencode_target "$skill_name")"
     fi
   done
 
@@ -455,6 +472,10 @@ install_one() {
   if [ "$AGENT" = "claude" ] || [ "$AGENT" = "all" ]; then
     install_for_agent "$skill_name" "$source_dir" claude
   fi
+
+  if [ "$AGENT" = "opencode" ] || [ "$AGENT" = "all" ]; then
+    install_for_agent "$skill_name" "$source_dir" opencode
+  fi
 }
 
 install_command() {
@@ -489,6 +510,12 @@ uninstall_one() {
     target_dir=$(claude_target "$skill_name")
     remove_directory "$target_dir" "$CLAUDE_HOME/skills"
     log_stdout uninstall "claude $(stdout_skill_name "$skill_name") <- $target_dir"
+  fi
+
+  if [ "$AGENT" = "opencode" ] || [ "$AGENT" = "all" ]; then
+    target_dir=$(opencode_target "$skill_name")
+    remove_directory "$target_dir" "$OPENCODE_HOME/skills"
+    log_stdout uninstall "opencode $(stdout_skill_name "$skill_name") <- $target_dir"
   fi
 }
 
