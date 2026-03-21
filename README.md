@@ -1,12 +1,12 @@
 # Agentic Skills
 
-This repository contains reusable skills for coding agents, including OpenCode.
+This repository contains reusable skills for coding agents, including tools that support agent-compatible skill directories such as Codex and OpenCode.
 
 Each skill lives in its own directory and is authored as a `SKILL.md`. That file is the source of truth and should follow the guidance from the skill.md standard site at `agentskills.io`.
 
 ## Purpose
 
-Treat skills as small, portable building blocks for agent behavior. This repo is where they are developed and from which they are installed into local agent-specific directories such as Codex, Claude, and OpenCode.
+Treat skills as small, portable building blocks for agent behavior. This repo is where they are developed and from which they are installed into agent-compatible skill directories plus Claude Code's tool-specific directory.
 
 ## Tooling
 
@@ -20,7 +20,7 @@ Installation is intentionally separate from the development toolchain. You do no
 
 ## Install
 
-The shell installer copies each skill into the locations expected by supported agents. For directory-based targets such as Codex and Claude, it installs the full skill directory so assets such as `agents/`, templates, or references can come along with it.
+The shell installer copies each skill into the locations expected by supported agents. It installs the full skill directory so assets such as `agents/`, templates, or references can come along with it.
 
 ```bash
 ./install.sh list
@@ -35,9 +35,8 @@ The shell installer copies each skill into the locations expected by supported a
 ```
 
 ```bash
-./install.sh install --agent codex git-commit
+./install.sh install --agent agents git-commit
 ./install.sh install --agent claude git-commit
-./install.sh install --agent opencode git-commit
 ```
 
 ```bash
@@ -45,30 +44,29 @@ The shell installer copies each skill into the locations expected by supported a
 ```
 
 ```bash
-./install.sh uninstall --all --agent codex
+./install.sh uninstall --all --agent agents
 ```
 
 Default install targets:
 
-- Codex: `~/.codex/skills/<skill>/SKILL.md`
+- Agent-compatible tools such as Codex and OpenCode: `~/.agents/skills/<skill>/SKILL.md`
 - Claude: `~/.claude/skills/<skill>/SKILL.md`
-- OpenCode: `~/.config/opencode/skills/<skill>/SKILL.md`
 
-For Codex, Claude, and OpenCode, the installed path is a full directory under each tool's `skills/` folder.
+For both targets, the installed path is a full directory under a `skills/` folder.
 
-If install finds an existing installed copy of the same skill, it prompts before overwriting. After a successful install, if the skill has been renamed, install separately prompts before removing any previously installed renamed copies for that same agent target. Use `--force` to skip both prompts, overwrite the existing installed skill, and automatically remove any previously installed renamed copies for the same skill. Use `--codex-home`, `--claude-home`, and `--opencode-home` to target custom install locations.
+If install finds an existing installed copy of the same skill, it prompts before overwriting. After a successful install, if the skill has been renamed, install separately prompts before removing any previously installed renamed copies for that same target. Use `--force` to skip both prompts, overwrite the existing installed skill, and automatically remove any previously installed renamed copies for the same skill. Use `--agents-home` and `--claude-home` to target custom install locations.
 
 When install output is connected to a color-capable terminal, it highlights action tags and skill names in status messages. Use `--no-color` to disable that formatting.
 
 Uninstall only works for skills that are present in this repository. During uninstall, the script warns before removing the installed skill directory because any local modifications to installed copies will be lost.
 
-When a skill has been renamed, install checks `skill-renames.txt` for old-to-new mappings after each successful per-agent install. If an old installed directory is still present for that agent target, the script prompts to remove that old installed copy.
+When a skill has been renamed, install checks `skill-renames.txt` for old-to-new mappings after each successful per-target install. If an old installed directory is still present for that target, the script prompts to remove that old installed copy.
 
 Development tooling still uses `mise` and `uv`. Installation does not.
 
 ## Testing
 
-The installer has a regression test covering discovery, directory-based installs for all supported agents, overwrite protection, uninstall behavior, and agent-specific installs.
+The installer has a regression test covering discovery, directory-based installs for all supported targets, overwrite protection, uninstall behavior, and target-specific installs.
 
 ```bash
 ./tests/install_test.sh
