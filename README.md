@@ -74,11 +74,11 @@ For work in this repository, you can make Codex's upstream system skills availab
 
 The script:
 
-- clones or fast-forwards `https://github.com/openai/skills.git` into `vendor/openai-skills`
+- initializes or updates the tracked `vendor/openai-skills` submodule from `https://github.com/openai/skills.git`
 - symlinks the upstream system skills into `.agents/skills`
 - currently links `openai-docs`, `skill-creator`, and `skill-installer`
 
-This setup is intentionally local to this repository. Both `.agents/` and `vendor/openai-skills/` are gitignored.
+This setup is repo-local. `.agents/` is committed, and `vendor/openai-skills/` is tracked as a git submodule. After clone, run `git submodule update --init` or `./scripts/update-openai-skills.sh` to populate the linked skill source.
 
 ## Testing
 
