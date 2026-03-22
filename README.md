@@ -64,6 +64,22 @@ When a skill has been renamed, install checks `skill-renames.txt` for old-to-new
 
 Development tooling still uses `mise` and `uv`. Installation does not.
 
+## Repo-local OpenAI system skills
+
+For work in this repository, you can make Codex's upstream system skills available to agent-compatible tools via a repo-local `.agents/skills` directory.
+
+```bash
+./scripts/update-openai-skills.sh
+```
+
+The script:
+
+- clones or fast-forwards `https://github.com/openai/skills.git` into `vendor/openai-skills`
+- symlinks the upstream system skills into `.agents/skills`
+- currently links `openai-docs`, `skill-creator`, and `skill-installer`
+
+This setup is intentionally local to this repository. Both `.agents/` and `vendor/openai-skills/` are gitignored.
+
 ## Testing
 
 The installer has a regression test covering discovery, directory-based installs for all supported targets, overwrite protection, uninstall behavior, and target-specific installs.
