@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Construct a succinct Conventional Commit message for the current repository state from the conversation history and full working tree, and when the user asks to commit, submit that commit. Analyze staged, unstaged, and untracked changes so the message captures the purpose of the full change set rather than only the latest prompt.
+description: Construct a succinct Conventional Commit message for the current repository state from the conversation history and full working tree before running `git commit`.
 ---
 
 # Git Commit
@@ -30,9 +30,7 @@ Prefer the single intention that best explains why the changes belong in one com
 
 ### 3. Choose the Conventional Commit Type
 
-Pick the type that matches the intent, not the implementation detail.
-
-Use these defaults:
+Pick the type that matches intent, not implementation detail:
 - `build` for build system or dependency changes
 - `chore` for maintenance work that does not fit better elsewhere
 - `ci` for CI configuration or automation changes
@@ -44,7 +42,7 @@ Use these defaults:
 - `style` for formatting or stylistic changes without behavior impact
 - `test` for adding or updating tests
 
-Add a scope only when it clarifies the message and remains short.
+Add a scope only when it adds clarity and stays short.
 
 ### 4. Write for Intent
 

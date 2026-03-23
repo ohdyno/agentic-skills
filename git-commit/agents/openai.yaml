@@ -1,4 +1,4 @@
 interface:
   display_name: "Git Commit"
-  short_description: "Build a Conventional Commit from conversation history and commit it"
-  default_prompt: "Use $git-commit to inspect the full change set, construct a Conventional Commit message from the conversation history, and run git commit."
+  short_description: "Build a Conventional Commit and commit it"
+  default_prompt: "Use $git-commit to inspect the full change set, construct a succinct Conventional Commit message from the conversation history and full working tree, and run git commit."
