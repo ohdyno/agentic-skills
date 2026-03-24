@@ -63,6 +63,9 @@ Use this template:
 
 <body, optional>
 
+Decision: <what was chosen>
+Why: <short reason>
+
 Refs: <ref1>[, <ref2>, ...]
 ```
 
@@ -83,6 +86,14 @@ Body:
 - Mention the key sequencing or tradeoff only when it clarifies intent
 - Omit file inventories, test lists, and low-level patch narration
 - Keep it to 1-2 short sentences
+
+Commit decisions:
+- Record a decision only if it changed behavior, design, or constraints.
+- Use this test: if someone later asks why this approach was chosen, and the answer is not obvious from the diff alone, record the decision.
+- Do not record purely mechanical edits such as formatting, renames without semantic change, typo fixes, or straightforward code motion.
+- When recording a decision, add a short paragraph using `Decision:` and `Why:`.
+- Capture only the most important decision for the commit unless multiple decisions are essential to understand it.
+- Prefer outcome and rationale over implementation detail.
 
 Refs:
 - Keep identifiers exact and concise.
