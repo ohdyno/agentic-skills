@@ -5,7 +5,7 @@ description: Use when the user wants to build a strong, factual mental model of 
 
 # Codebase Mental Model
 
-Help the user build a strong, factual mental model of any codebase so they can reason confidently about it. Do not default to either a lecture or a quiz. Inspect the codebase, identify the most important concepts, then use a conversational, evidence-based teaching loop to refine the user's model. Prefer Socratic questioning when it helps surface assumptions, test predictions, and reveal misconceptions, but switch to brief direct explanation when the learner needs grounding or explicitly asks for it.
+Help the user build a strong, factual mental model of any codebase so they can reason confidently about it. Do not default to either a lecture or a quiz. Inspect the codebase, identify the most important concepts, then use a conversational, evidence-based teaching loop to refine the user's model. Prefer Socratic questioning when it surfaces assumptions, tests predictions, or reveals misconceptions, but switch to brief direct explanation when the learner needs grounding or asks for it.
 
 ## Outcome
 
@@ -36,11 +36,11 @@ Focus on:
 - tests, observability, and likely operational risks
 - signs of historical layering or design tradeoffs
 
-Do not perform exhaustive research up front. Read enough to guide the user accurately, then continue refining your model between turns.
+Do not research exhaustively up front. Read enough to guide the user accurately, then refine your model between turns.
 
 ### 2. Start With Their Current Model, Then Refine It
 
-Start by eliciting the user's current model of the codebase, or give a short evidence-based framing if they have none yet. Then refine that model through focused questions, short explanations, and concrete source references. Prefer Socratic questions when they will help the learner articulate how they think the system works, what they expect to happen, and where they are uncertain.
+Start by eliciting the user's current model of the codebase, or give a short evidence-based framing if they have none yet. Then refine that model through focused questions, short explanations, and concrete source references. Prefer Socratic questions when they help the learner articulate how the system works, what they expect to happen, and where they are uncertain.
 
 Prefer this order unless the user's goal suggests a different path:
 
@@ -57,7 +57,7 @@ Prefer this order unless the user's goal suggests a different path:
 
 ### 3. Use One High-Signal Step At A Time
 
-Prefer one useful step at a time: a Socratic question, a contrast, a missing piece, or a source-backed correction. Ask a direct question when that will reveal the user's current model. Offer a brief explanation when the learner needs grounding before the next question. Questions should be targeted, evidence-oriented, and aimed at causal reasoning, tradeoffs, invariants, end-to-end flow, or safe-change implications.
+Prefer one useful step at a time: a Socratic question, a contrast, a missing piece, or a source-backed correction. Ask a direct question when it will reveal the user's current model. Offer a brief explanation when the learner needs grounding before the next question. Questions should be targeted, evidence-based, and aimed at causal reasoning, tradeoffs, invariants, end-to-end flow, or safe change.
 
 Prefer prompts that require:
 
@@ -91,7 +91,7 @@ If the learner is weak:
 - provide a short framing explanation before the next question when needed
 - test one missing concept at a time
 
-Do not force Socratic questioning when the learner explicitly wants a direct explanation, lacks enough context to answer productively, or is blocked on a missing concept that can be unlocked with a concise explanation first.
+Do not force Socratic questioning when the learner wants a direct explanation, lacks enough context to answer productively, or is blocked on a concept that needs a concise explanation first.
 
 If the learner is strong:
 
@@ -113,7 +113,7 @@ End a session with a concise synthesis and 2-4 recommended areas for further stu
 
 ## Model-Building Dimensions
 
-Use these dimensions to decide what the learner needs to understand next. You may use questions, short explanations, code walkthroughs, or source-backed contrasts to build understanding.
+Use these dimensions to decide what the learner should understand next. Use questions, short explanations, code walkthroughs, or source-backed contrasts as needed.
 
 ### 1. Problem And Product Intent
 
@@ -217,12 +217,12 @@ Strong answers compress complexity into a few predictive ideas.
 
 ## Discrepancy-Based Feedback
 
-Do not focus on judging the learner with a score or label. Focus on showing where their current explanation diverges from the evidence.
+Do not score the learner. Show where their explanation diverges from the evidence.
 
 For each answer, try to surface one or more of these:
 
 - `supported understanding`: claims that are well backed by the codebase
-- `missing evidence`: claims that may be reasonable but are not yet supported by the inspected code
+- `missing evidence`: claims that may be reasonable but are not yet supported by the code inspected so far
 - `discrepancy`: places where the learner's model conflicts with specific files, tests, configuration, or runtime behavior
 - `open question`: uncertainty that should be resolved by inspecting a particular file, test, commit, or external reference
 
@@ -231,7 +231,7 @@ When highlighting a discrepancy:
 - cite specific files, tests, configuration, or docs from the repository
 - quote or paraphrase only the minimum needed to ground the point
 - prefer primary sources such as implementation files, tests, architecture docs, ADRs, runbooks, and official framework or library docs
-- use external expert sources only to clarify a concept or framework behavior that the repository depends on
+- use external sources only to clarify a concept or framework behavior that the repository depends on
 - distinguish clearly between what the codebase proves and what you are inferring
 
 Prefer feedback such as:
