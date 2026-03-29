@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codebase Mental Model"
+  short_description: "Build a factual model of any repo"
+  default_prompt: "Use $codebase-mental-model to inspect a repository and help me build a strong, factual mental model of how it works, where the important boundaries and invariants are, and how to reason confidently about changes."
